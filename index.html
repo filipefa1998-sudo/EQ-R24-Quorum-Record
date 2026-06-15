@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>Quorum Ordinance Record</title>
+<style>
+  :root{
+    --ink:#1c2541; --ink2:#141a30; --ground:#f6f2e9; --card:#ffffff;
+    --gold:#b0893a; --gold-soft:#e7dcc1; --gold-line:#d8c9a3;
+    --text:#262a36; --muted:#6d7180; --line:#e6dfce;
+    --danger:#9d3b3b; --ok:#3f7d5a; --warn:#b07d1a; --info:#365a8c;
+    --shadow:0 6px 24px rgba(20,26,48,.10);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--ground);color:var(--text);line-height:1.45;-webkit-font-smoothing:antialiased}
+  .serif{font-family:Georgia,"Times New Roman",serif}
+  button{font-family:inherit;cursor:pointer;border:none}
+  input,select,textarea{font-family:inherit;font-size:14px}
+
+  /* ---------- GATE (loading + login) ---------- */
+  #gate{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(120% 120% at 50% 0%,#26305a 0%,var(--ink) 45%,var(--ink2) 100%);
+    z-index:50;padding:24px}
+  .gatecard{width:100%;max-width:380px;text-align:center;color:#f3eedf}
+  .crest{width:62px;height:62px;margin:0 auto 18px;border:2px solid var(--gold);
+    border-radius:50%;display:flex;align-items:center;justify-content:center}
+  .crest svg{width:30px;height:30px;fill:var(--gold)}
+  .gatecard h1{font-size:25px;font-weight:600;letter-spacing:.5px;margin-bottom:6px}
+  .gatecard .sub{font-size:12.5px;color:#b9c0d8;margin-bottom:6px;letter-spacing:.4px}
+  .gatecard .sacred{font-size:11.5px;color:#8c95b6;font-style:italic;margin-bottom:26px}
+  .gate-in{width:100%;padding:13px 16px;border-radius:11px;border:1px solid #3a426a;
+    background:#1b2240;color:#fff;font-size:15px;margin-bottom:11px}
+  .gate-in::placeholder{color:#6c7498}
+  .gate-in:focus{outline:none;border-color:var(--gold)}
+  .gatebtn{width:100%;margin-top:4px;padding:13px;border-radius:11px;background:var(--gold);
+    color:#241c08;font-weight:700;font-size:14.5px;letter-spacing:.4px}
+  .gatebtn:active{transform:translateY(1px)}
+  .gatebtn[disabled]{opacity:.6;cursor:default}
+  .gatemsg{min-height:18px;margin-top:14px;font-size:12.5px;color:#e8b9b9}
+  .gatemsg.good{color:#a9d8bf}
+  .forgot{margin-top:14px;font-size:12px;color:#8e97bd;background:none;text-decoration:underline}
+  .spinner{width:34px;height:34px;border:3px solid rgba(255,255,255,.18);border-top-color:var(--gold);
+    border-radius:50%;margin:30px auto 0;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* ---------- APP ---------- */
+  #app{display:none;min-height:100vh;flex-direction:column}
+  header.topbar{background:var(--ink);color:#fff;padding:0 16px;position:sticky;top:0;z-index:20;
+    box-shadow:0 2px 12px rgba(0,0,0,.18)}
+  .topinner{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:14px;height:58px}
+  .brand{display:flex;align-items:center;gap:10px;font-family:Georgia,serif;font-size:17px;font-weight:600;
+    letter-spacing:.3px;white-space:nowrap}
+  .brand svg{width:20px;height:20px;fill:var(--gold)}
+  nav.tabs{display:flex;gap:4px;margin-left:8px;flex:1}
+  nav.tabs button{background:transparent;color:#c2c8de;padding:8px 14px;border-radius:8px;font-size:13.5px;font-weight:500}
+  nav.tabs button.active{background:rgba(176,137,58,.18);color:var(--gold)}
+  .lockout{background:rgba(255,255,255,.08);color:#dfe3f0;padding:8px 12px;border-radius:8px;font-size:12.5px}
+
+  main{max-width:1180px;margin:0 auto;width:100%;padding:22px 16px 60px;flex:1}
+  .view{display:none}
+  .view.active{display:block}
+  .vhead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+  .vhead h2{font-family:Georgia,serif;font-size:21px;color:var(--ink);font-weight:600}
+  .vhead .note{font-size:12px;color:var(--muted)}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:14px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 16px 14px;
+    box-shadow:var(--shadow);position:relative;overflow:hidden}
+  .stat::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--gold)}
+  .stat.alert::before{background:var(--danger)}
+  .stat.info::before{background:var(--info)}
+  .stat .n{font-family:Georgia,serif;font-size:30px;font-weight:700;color:var(--ink);line-height:1}
+  .stat .l{font-size:11.5px;color:var(--muted);margin-top:7px;letter-spacing:.2px}
+  .sectlabel{font-size:11.5px;font-weight:700;letter-spacing:1.2px;color:var(--gold);
+    text-transform:uppercase;margin:26px 0 12px}
+  .sectlabel:first-child{margin-top:0}
+
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+  .toolbar input[type=text],.toolbar select{padding:9px 12px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--text)}
+  .toolbar input[type=text]{flex:1;min-width:160px}
+  .btn{padding:9px 16px;border-radius:9px;font-weight:600;font-size:13.5px}
+  .btn.primary{background:var(--ink);color:#fff}
+  .btn.gold{background:var(--gold);color:#241c08}
+  .btn.ghost{background:#fff;border:1px solid var(--line);color:var(--text)}
+  .btn.danger{background:#fff;border:1px solid var(--danger);color:var(--danger)}
+  .btn:active{transform:translateY(1px)}
+
+  .tablewrap{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:auto}
+  table{width:100%;border-collapse:collapse;font-size:13px;min-width:760px}
+  thead th{background:#2a3358;color:#e9e3d2;text-align:left;padding:11px 12px;font-weight:600;font-size:11.5px;
+    letter-spacing:.4px;white-space:nowrap;position:sticky;top:0}
+  tbody td{padding:10px 12px;border-top:1px solid var(--line);vertical-align:middle}
+  tbody tr{cursor:pointer}
+  tbody tr:hover{background:#faf7ef}
+  tbody tr:nth-child(even){background:#fcfaf4}
+  tbody tr:nth-child(even):hover{background:#f6f1e6}
+  .nm{font-weight:600;color:var(--ink)}
+  .empty{padding:46px 20px;text-align:center;color:var(--muted);font-size:14px}
+
+  .badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
+  .b-ok{background:#e4f1ea;color:var(--ok)} .b-warn{background:#f7ecd2;color:var(--warn)}
+  .b-danger{background:#f6e1e1;color:var(--danger)} .b-info{background:#e3ebf6;color:var(--info)}
+  .b-gold{background:var(--gold-soft);color:#7a5e1d} .b-grey{background:#edeef1;color:var(--muted)}
+
+  .overlay{position:fixed;inset:0;background:rgba(20,26,48,.55);display:none;align-items:flex-start;
+    justify-content:center;z-index:40;padding:24px 14px;overflow:auto}
+  .overlay.show{display:flex}
+  .modal{background:#fff;border-radius:16px;width:100%;max-width:680px;box-shadow:0 18px 50px rgba(0,0,0,.3);overflow:hidden;margin:auto}
+  .mhead{background:var(--ink);color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center}
+  .mhead h3{font-family:Georgia,serif;font-size:18px;font-weight:600}
+  .mhead .x{background:rgba(255,255,255,.12);color:#fff;width:30px;height:30px;border-radius:8px;font-size:18px}
+  .mbody{padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:14px 16px}
+  .fld{display:flex;flex-direction:column;gap:5px}
+  .fld.full{grid-column:1/-1}
+  .fld label{font-size:11.5px;font-weight:700;color:var(--muted);letter-spacing:.3px;text-transform:uppercase}
+  .fld input,.fld select,.fld textarea{padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--text)}
+  .fld textarea{resize:vertical;min-height:58px}
+  .fld input:focus,.fld select:focus,.fld textarea:focus{outline:none;border-color:var(--gold)}
+  .mfoot{padding:14px 20px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:10px}
+
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;box-shadow:var(--shadow);max-width:560px;margin-bottom:16px}
+  .panel h3{font-family:Georgia,serif;font-size:16px;color:var(--ink);margin-bottom:6px}
+  .panel p{font-size:12.5px;color:var(--muted);margin-bottom:14px}
+  .panel .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .smsg{font-size:12.5px;margin-top:10px;min-height:16px}
+  .smsg.ok{color:var(--ok)} .smsg.err{color:var(--danger)}
+  .who{font-size:13px;color:var(--text)}
+  .who b{color:var(--ink)}
+  .privacy{background:#fbf7ee;border:1px solid var(--gold-line);border-radius:12px;padding:14px 16px;
+    font-size:12.5px;color:#6a5a32;max-width:560px;margin-bottom:20px;line-height:1.6}
+  .privacy b{color:#5a4a22}
+
+  @media(max-width:640px){
+    .mbody{grid-template-columns:1fr}
+    .topinner{height:auto;padding:10px 0;flex-wrap:wrap}
+    nav.tabs{order:3;width:100%;margin-left:0}
+    nav.tabs button{flex:1}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===================== GATE ===================== -->
+<div id="gate">
+  <div class="gatecard">
+    <div class="crest">
+      <svg viewBox="0 0 24 24"><path d="M12 2l2.4 5.2L20 8l-4 4 1 6-5-2.8L7 18l1-6-4-4 5.6-.8L12 2z"/></svg>
+    </div>
+    <h1 class="serif">Quorum Ordinance Record</h1>
+    <div class="sub">Elders Quorum Presidency</div>
+    <div class="sacred">Held in confidence — authorized members only</div>
+
+    <div id="gateLoading"><div class="spinner"></div></div>
+
+    <div id="gateLogin" style="display:none">
+      <input id="email" class="gate-in" type="email" placeholder="Email" autocomplete="username">
+      <input id="password" class="gate-in" type="password" placeholder="Password" autocomplete="current-password">
+      <button class="gatebtn" id="signinBtn">Sign In</button>
+      <div class="gatemsg" id="gateMsg"></div>
+      <button class="forgot" id="forgotBtn">Forgot password?</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== APP ===================== -->
+<div id="app">
+  <header class="topbar">
+    <div class="topinner">
+      <div class="brand serif">
+        <svg viewBox="0 0 24 24"><path d="M12 2l2.4 5.2L20 8l-4 4 1 6-5-2.8L7 18l1-6-4-4 5.6-.8L12 2z"/></svg>
+        Quorum Ordinance Record
+      </div>
+      <nav class="tabs">
+        <button data-view="dash" class="active">Dashboard</button>
+        <button data-view="roster">Brethren</button>
+        <button data-view="settings">Settings</button>
+      </nav>
+      <button class="lockout" id="signoutBtn">Sign Out</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="view active" id="view-dash">
+      <div class="vhead">
+        <h2 class="serif">Presidency Overview</h2>
+        <span class="note" id="updatedNote"></span>
+      </div>
+      <div class="sectlabel">Roster &amp; Records</div>
+      <div class="grid" id="cardsRoster"></div>
+      <div class="sectlabel">Priesthood Progression</div>
+      <div class="grid" id="cardsPriest"></div>
+      <div class="sectlabel">Temple &amp; Ordinances</div>
+      <div class="grid" id="cardsTemple"></div>
+    </section>
+
+    <section class="view" id="view-roster">
+      <div class="vhead">
+        <h2 class="serif">Brethren</h2>
+        <button class="btn gold" id="addBtn">+ Add Brother</button>
+      </div>
+      <div class="toolbar">
+        <input type="text" id="search" placeholder="Search by name…">
+        <select id="filter">
+          <option value="all">All brethren</option>
+          <option value="transfer">Records: transfer needed</option>
+          <option value="expired">Active w/ expired recommend</option>
+          <option value="prep">In temple prep class</option>
+          <option value="endow">Next ordinance: Endowment</option>
+          <option value="prospect">Prospective elders</option>
+          <option value="advance">Advancement in progress</option>
+        </select>
+      </div>
+      <div class="tablewrap">
+        <table>
+          <thead><tr>
+            <th>Name</th><th>Boundaries</th><th>Records</th><th>Activity</th>
+            <th>Office</th><th>Next Office</th><th>Recommend</th><th>Renewal</th>
+            <th>Temple Prep</th><th>Next Ordinance</th>
+          </tr></thead>
+          <tbody id="rosterBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="view" id="view-settings">
+      <div class="vhead"><h2 class="serif">Settings</h2></div>
+      <div class="privacy">
+        <b>Where your data lives:</b> Brethren records are stored in your private Firebase project and
+        synced live across the presidency. Access requires a signed-in, authorized account, enforced by
+        Firestore security rules. Nothing is stored inside the file on GitHub.
+      </div>
+
+      <div class="panel">
+        <h3>Signed In</h3>
+        <p>You are signed in to the quorum record.</p>
+        <div class="who">Account: <b id="meEmail">—</b></div>
+        <div class="row" style="margin-top:14px">
+          <button class="btn ghost" id="resetPwBtn">Send password reset email</button>
+        </div>
+        <div class="smsg" id="pwMsg"></div>
+      </div>
+
+      <div class="panel">
+        <h3>Backup &amp; Migration</h3>
+        <p>Export a JSON backup of all brethren, or import records (e.g. from the offline version) into the cloud.</p>
+        <div class="row">
+          <button class="btn gold" id="exportBtn">Export backup</button>
+          <button class="btn ghost" id="importBtn">Import into cloud</button>
+          <input type="file" id="importFile" accept="application/json" style="display:none">
+        </div>
+        <div class="smsg" id="ioMsg"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ===================== EDIT MODAL ===================== -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="mhead">
+      <h3 class="serif" id="modalTitle">Add Brother</h3>
+      <button class="x" id="closeModal">&times;</button>
+    </div>
+    <div class="mbody" id="modalBody"></div>
+    <div class="mfoot">
+      <button class="btn danger" id="deleteBtn" style="visibility:hidden">Delete</button>
+      <div style="display:flex;gap:10px">
+        <button class="btn ghost" id="cancelBtn">Cancel</button>
+        <button class="btn primary" id="saveBtn">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+/* ===================== FIREBASE CONFIG ===================== */
+const firebaseConfig = {
+  apiKey: "AIzaSyAEO5e24Pl1-Jqu_NIVSTUhhVMQ_exYCy4",
+  authDomain: "eq24-a5fc8.firebaseapp.com",
+  projectId: "eq24-a5fc8",
+  storageBucket: "eq24-a5fc8.firebasestorage.app",
+  messagingSenderId: "525690873399",
+  appId: "1:525690873399:web:b58a7dd79f2346008341b2"
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const COL = "brethren";
+
+/* ===================== OPTION LISTS ===================== */
+const OPTS = {
+  boundaries: ["Yes","No"],
+  records: ["In Ward — OK","Transfer In Needed","Transfer Out Needed","Address Unknown","Out — Notify Clerk"],
+  activity: ["Active","Semi-Active","Less-Active","Inactive","New Move-In"],
+  office: ["Unordained","Deacon","Teacher","Priest","Prospective Elder","Elder","High Priest"],
+  nextOffice: ["None","Ordain Teacher","Ordain Priest","Ordain Elder","Ordain High Priest"],
+  recommend: ["Current","Expired","Never Held","N/A"],
+  recommendType: ["Full","Limited-Use","None"],
+  templePrep: ["Not Enrolled","Enrolled","Attending","Attended — Not Complete","Completed"],
+  nextOrdinance: ["None","Melchizedek Ordination","Endowment","Sealing — Spouse","Sealing — Family","Other"]
+};
+const FIELDS = [
+  {k:"name",l:"Full Name",t:"text"},
+  {k:"phone",l:"Phone",t:"text"},
+  {k:"boundaries",l:"In Ward Boundaries",t:"sel",opt:"boundaries"},
+  {k:"records",l:"Records Status",t:"sel",opt:"records"},
+  {k:"activity",l:"Activity",t:"sel",opt:"activity"},
+  {k:"office",l:"Current Priesthood Office",t:"sel",opt:"office"},
+  {k:"nextOffice",l:"Next Priesthood Office",t:"sel",opt:"nextOffice"},
+  {k:"nextSteps",l:"Next Steps (advancement)",t:"area",full:true},
+  {k:"recommend",l:"Temple Recommend Status",t:"sel",opt:"recommend"},
+  {k:"recommendType",l:"Recommend Type",t:"sel",opt:"recommendType"},
+  {k:"expires",l:"Recommend Expires",t:"date"},
+  {k:"templePrep",l:"Temple Prep Class",t:"sel",opt:"templePrep"},
+  {k:"nextOrdinance",l:"Next Ordinance Needed",t:"sel",opt:"nextOrdinance"},
+  {k:"ministering",l:"Ministering Brother(s)",t:"text"},
+  {k:"notes",l:"Notes",t:"area",full:true}
+];
+
+let data = [];
+let editingId = null;
+let unsub = null;
+const $ = function(id){ return document.getElementById(id); };
+function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+
+/* ===================== AUTH GATE ===================== */
+const gate=$("gate"), appEl=$("app"), gateLoading=$("gateLoading"), gateLogin=$("gateLogin"), gateMsg=$("gateMsg");
+
+onAuthStateChanged(auth, function(user){
+  if(user){
+    gate.style.display="none";
+    appEl.style.display="flex";
+    $("meEmail").textContent = user.email || "(unknown)";
+    startSync();
+  }else{
+    if(unsub){ unsub(); unsub=null; }
+    appEl.style.display="none";
+    gate.style.display="flex";
+    gateLoading.style.display="none";
+    gateLogin.style.display="block";
+    $("email").focus();
+  }
+});
+
+function authError(code){
+  const map={
+    "auth/invalid-email":"That email address isn't valid.",
+    "auth/invalid-credential":"Email or password is incorrect.",
+    "auth/wrong-password":"Email or password is incorrect.",
+    "auth/user-not-found":"No account found for that email.",
+    "auth/too-many-requests":"Too many attempts. Please wait a moment and try again.",
+    "auth/network-request-failed":"Network error. Check your connection."
+  };
+  return map[code] || "Sign-in failed. Please try again.";
+}
+
+$("signinBtn").addEventListener("click", doSignin);
+$("password").addEventListener("keydown", function(e){ if(e.key==="Enter") doSignin(); });
+$("email").addEventListener("keydown", function(e){ if(e.key==="Enter") $("password").focus(); });
+
+function doSignin(){
+  const em=$("email").value.trim(), pw=$("password").value;
+  if(!em || !pw){ gateMsg.className="gatemsg"; gateMsg.textContent="Enter your email and password."; return; }
+  $("signinBtn").disabled=true; gateMsg.textContent="";
+  signInWithEmailAndPassword(auth, em, pw)
+    .then(function(){ $("password").value=""; })
+    .catch(function(err){ gateMsg.className="gatemsg"; gateMsg.textContent=authError(err.code); })
+    .finally(function(){ $("signinBtn").disabled=false; });
+}
+
+$("forgotBtn").addEventListener("click", function(){
+  const em=$("email").value.trim();
+  if(!em){ gateMsg.className="gatemsg"; gateMsg.textContent="Enter your email above first, then tap Forgot password."; return; }
+  sendPasswordResetEmail(auth, em)
+    .then(function(){ gateMsg.className="gatemsg good"; gateMsg.textContent="Reset email sent — check your inbox."; })
+    .catch(function(err){ gateMsg.className="gatemsg"; gateMsg.textContent=authError(err.code); });
+});
+
+$("signoutBtn").addEventListener("click", function(){ signOut(auth); });
+
+/* ===================== FIRESTORE SYNC ===================== */
+function startSync(){
+  if(unsub) return;
+  unsub = onSnapshot(collection(db, COL), function(snap){
+    data = [];
+    snap.forEach(function(d){ const o=d.data(); o.id=d.id; data.push(o); });
+    data.sort(function(a,b){ return (a.name||"").localeCompare(b.name||""); });
+    renderAll();
+  }, function(err){
+    $("rosterBody").innerHTML = '<tr><td colspan="10" class="empty">Could not load records: '+esc(err.code||err.message)+'. Check Firestore rules / authorization.</td></tr>';
+  });
+}
+function writeBrother(rec){ return setDoc(doc(db, COL, rec.id), rec, {merge:true}); }
+function removeBrother(id){ return deleteDoc(doc(db, COL, id)); }
+
+/* ===================== NAV ===================== */
+document.querySelectorAll("nav.tabs button").forEach(function(b){
+  b.addEventListener("click", function(){
+    document.querySelectorAll("nav.tabs button").forEach(function(x){x.classList.remove("active");});
+    b.classList.add("active");
+    document.querySelectorAll(".view").forEach(function(v){v.classList.remove("active");});
+    $("view-"+b.dataset.view).classList.add("active");
+  });
+});
+
+/* ===================== RENEWAL FLAG ===================== */
+function renewalFlag(p){
+  const active=(p.activity==="Active"||p.activity==="Semi-Active");
+  if(!active) return {t:"—",c:"b-grey"};
+  if(p.recommend==="Expired") return {t:"RENEW",c:"b-danger"};
+  if(p.recommend==="Current" && p.expires){
+    const d=new Date(p.expires);
+    if(!isNaN(d)){
+      const days=(d-new Date())/86400000;
+      if(days<=90) return {t:"Expiring <90d",c:"b-warn"};
+      return {t:"OK",c:"b-ok"};
+    }
+  }
+  if(p.recommend==="Current") return {t:"OK",c:"b-ok"};
+  return {t:"—",c:"b-grey"};
+}
+
+/* ===================== DASHBOARD ===================== */
+function cnt(fn){ return data.filter(fn).length; }
+function renderDash(){
+  const inPrep=function(p){ return p.templePrep==="Enrolled"||p.templePrep==="Attending"||p.templePrep==="Attended — Not Complete"; };
+  const roster=[
+    ["Brethren Tracked",data.length,""],
+    ["In Ward Boundaries",cnt(function(p){return p.boundaries==="Yes";}),""],
+    ["Outside Boundaries",cnt(function(p){return p.boundaries==="No";}),"alert"],
+    ["Records: Transfer Needed",cnt(function(p){return /Transfer/.test(p.records||"");}),"alert"]
+  ];
+  const priest=[
+    ["Elders",cnt(function(p){return p.office==="Elder";}),""],
+    ["High Priests",cnt(function(p){return p.office==="High Priest";}),""],
+    ["Prospective Elders",cnt(function(p){return p.office==="Prospective Elder";}),"info"],
+    ["Advancement In Progress",cnt(function(p){return p.nextOffice && p.nextOffice!=="None";}),"info"]
+  ];
+  const temple=[
+    ["Active w/ Expired Recommend",cnt(function(p){return (p.activity==="Active"||p.activity==="Semi-Active")&&p.recommend==="Expired";}),"alert"],
+    ["In Temple Prep Class",cnt(inPrep),""],
+    ["Need Endowment (next)",cnt(function(p){return p.nextOrdinance==="Endowment";}),"info"],
+    ["Need Sealing (next)",cnt(function(p){return p.nextOrdinance==="Sealing — Spouse"||p.nextOrdinance==="Sealing — Family";}),"info"]
+  ];
+  function fill(id,arr){
+    $(id).innerHTML = arr.map(function(c){ return '<div class="stat '+c[2]+'"><div class="n">'+c[1]+'</div><div class="l">'+c[0]+'</div></div>'; }).join("");
+  }
+  fill("cardsRoster",roster); fill("cardsPriest",priest); fill("cardsTemple",temple);
+  $("updatedNote").textContent = data.length ? (data.length+" brethren on record") : "No brethren entered yet";
+}
+
+/* ===================== ROSTER ===================== */
+function badge(val,map){ return '<span class="badge '+(map[val]||"b-grey")+'">'+(val||"—")+'</span>'; }
+const recMap={"Current":"b-ok","Expired":"b-danger","Never Held":"b-grey","N/A":"b-grey"};
+const actMap={"Active":"b-ok","Semi-Active":"b-warn","Less-Active":"b-warn","Inactive":"b-grey","New Move-In":"b-info"};
+const prepMap={"Completed":"b-ok","Attending":"b-info","Enrolled":"b-info","Attended — Not Complete":"b-warn","Not Enrolled":"b-grey"};
+const ordMap={"Endowment":"b-gold","Sealing — Spouse":"b-gold","Sealing — Family":"b-gold","Melchizedek Ordination":"b-gold","Other":"b-info","None":"b-grey"};
+const offMap={"Elder":"b-ok","High Priest":"b-ok","Prospective Elder":"b-info"};
+
+function passesFilter(p,f){
+  switch(f){
+    case "transfer": return /Transfer/.test(p.records||"");
+    case "expired": return (p.activity==="Active"||p.activity==="Semi-Active")&&p.recommend==="Expired";
+    case "prep": return p.templePrep==="Enrolled"||p.templePrep==="Attending"||p.templePrep==="Attended — Not Complete";
+    case "endow": return p.nextOrdinance==="Endowment";
+    case "prospect": return p.office==="Prospective Elder";
+    case "advance": return p.nextOffice && p.nextOffice!=="None";
+    default: return true;
+  }
+}
+function renderRoster(){
+  const q=$("search").value.toLowerCase(), f=$("filter").value;
+  const rows=data.filter(function(p){ return passesFilter(p,f) && (!q || (p.name||"").toLowerCase().indexOf(q)>=0); });
+  const body=$("rosterBody");
+  if(!rows.length){ body.innerHTML='<tr><td colspan="10" class="empty">No brethren match. Use “+ Add Brother” to begin.</td></tr>'; return; }
+  body.innerHTML = rows.map(function(p){
+    const rf=renewalFlag(p);
+    const bnd = p.boundaries==="No" ? '<span class="badge b-warn">No</span>' : (p.boundaries==="Yes"?'<span class="badge b-ok">Yes</span>':'<span class="badge b-grey">—</span>');
+    const rec = /Transfer/.test(p.records||"") ? '<span class="badge b-warn">'+esc(p.records)+'</span>' : '<span class="badge b-grey">'+esc(p.records||"—")+'</span>';
+    return '<tr data-id="'+esc(p.id)+'">'+
+      '<td class="nm">'+esc(p.name||"—")+'</td>'+
+      '<td>'+bnd+'</td>'+
+      '<td>'+rec+'</td>'+
+      '<td>'+badge(p.activity,actMap)+'</td>'+
+      '<td>'+badge(p.office,offMap)+'</td>'+
+      '<td>'+(p.nextOffice&&p.nextOffice!=="None"?'<span class="badge b-info">'+esc(p.nextOffice)+'</span>':'<span class="badge b-grey">—</span>')+'</td>'+
+      '<td>'+badge(p.recommend,recMap)+'</td>'+
+      '<td><span class="badge '+rf.c+'">'+rf.t+'</span></td>'+
+      '<td>'+badge(p.templePrep,prepMap)+'</td>'+
+      '<td>'+badge(p.nextOrdinance,ordMap)+'</td>'+
+    '</tr>';
+  }).join("");
+  body.querySelectorAll("tr").forEach(function(tr){ tr.addEventListener("click", function(){ openModal(tr.dataset.id); }); });
+}
+$("search").addEventListener("input", renderRoster);
+$("filter").addEventListener("change", renderRoster);
+
+/* ===================== MODAL ===================== */
+const overlay=$("overlay"), modalBody=$("modalBody");
+function buildModal(p){
+  modalBody.innerHTML = FIELDS.map(function(fl){
+    const v=p[fl.k]||"", cls=fl.full?"fld full":"fld";
+    let ctrl;
+    if(fl.t==="sel"){
+      ctrl='<select data-k="'+fl.k+'"><option value=""></option>'+OPTS[fl.opt].map(function(o){return '<option'+(o===v?' selected':'')+'>'+o+'</option>';}).join("")+'</select>';
+    }else if(fl.t==="area"){
+      ctrl='<textarea data-k="'+fl.k+'">'+esc(v)+'</textarea>';
+    }else if(fl.t==="date"){
+      ctrl='<input type="date" data-k="'+fl.k+'" value="'+esc(v)+'">';
+    }else{
+      ctrl='<input type="text" data-k="'+fl.k+'" value="'+esc(v)+'">';
+    }
+    return '<div class="'+cls+'"><label>'+fl.l+'</label>'+ctrl+'</div>';
+  }).join("");
+}
+function openModal(id){
+  const p = id ? data.find(function(x){return x.id===id;}) : {};
+  editingId = id || null;
+  $("modalTitle").textContent = id ? "Edit Brother" : "Add Brother";
+  $("deleteBtn").style.visibility = id ? "visible" : "hidden";
+  buildModal(p||{});
+  overlay.classList.add("show");
+}
+function closeModal(){ overlay.classList.remove("show"); editingId=null; }
+$("addBtn").addEventListener("click", function(){ openModal(null); });
+$("closeModal").addEventListener("click", closeModal);
+$("cancelBtn").addEventListener("click", closeModal);
+overlay.addEventListener("click", function(e){ if(e.target===overlay) closeModal(); });
+
+$("saveBtn").addEventListener("click", function(){
+  const rec={};
+  modalBody.querySelectorAll("[data-k]").forEach(function(el){ rec[el.dataset.k]=el.value.trim(); });
+  if(!rec.name){ alert("Please enter a name."); return; }
+  rec.updated = new Date().toISOString().slice(0,10);
+  rec.id = editingId || ("b"+Date.now()+Math.floor(Math.random()*1000));
+  $("saveBtn").disabled=true;
+  writeBrother(rec).then(closeModal).catch(function(e){ alert("Save failed: "+(e.code||e.message)); })
+    .finally(function(){ $("saveBtn").disabled=false; });
+});
+$("deleteBtn").addEventListener("click", function(){
+  if(!editingId) return;
+  if(confirm("Remove this brother from the record?")){
+    removeBrother(editingId).then(closeModal).catch(function(e){ alert("Delete failed: "+(e.code||e.message)); });
+  }
+});
+
+/* ===================== SETTINGS ===================== */
+$("resetPwBtn").addEventListener("click", function(){
+  const m=$("pwMsg"); const user=auth.currentUser;
+  if(!user||!user.email){ m.className="smsg err"; m.textContent="No account email on file."; return; }
+  sendPasswordResetEmail(auth, user.email)
+    .then(function(){ m.className="smsg ok"; m.textContent="Reset email sent to "+user.email+"."; })
+    .catch(function(e){ m.className="smsg err"; m.textContent="Could not send reset: "+(e.code||e.message); });
+});
+$("exportBtn").addEventListener("click", function(){
+  const blob=new Blob([JSON.stringify({exported:new Date().toISOString(),brethren:data},null,2)],{type:"application/json"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="quorum-ordinance-backup-"+new Date().toISOString().slice(0,10)+".json";
+  a.click(); URL.revokeObjectURL(a.href);
+  const m=$("ioMsg"); m.className="smsg ok"; m.textContent="Backup downloaded.";
+});
+$("importBtn").addEventListener("click", function(){ $("importFile").click(); });
+$("importFile").addEventListener("change", function(e){
+  const file=e.target.files[0]; if(!file) return;
+  const r=new FileReader();
+  r.onload=function(){
+    try{
+      const obj=JSON.parse(r.result);
+      const arr=Array.isArray(obj)?obj:obj.brethren;
+      if(!Array.isArray(arr)) throw new Error("bad");
+      const m=$("ioMsg"); m.className="smsg"; m.textContent="Importing "+arr.length+"…";
+      const jobs=arr.map(function(p){
+        if(!p.id) p.id="b"+Date.now()+Math.floor(Math.random()*100000);
+        return writeBrother(p);
+      });
+      Promise.all(jobs)
+        .then(function(){ m.className="smsg ok"; m.textContent="Imported "+arr.length+" brethren into the cloud."; })
+        .catch(function(err){ m.className="smsg err"; m.textContent="Some records failed: "+(err.code||err.message); });
+    }catch(err){
+      const m2=$("ioMsg"); m2.className="smsg err"; m2.textContent="Could not read that file.";
+    }
+  };
+  r.readAsText(file);
+  e.target.value="";
+});
+
+/* ===================== RENDER ALL ===================== */
+function renderAll(){ renderDash(); renderRoster(); }
+</script>
+</body>
+</html>
