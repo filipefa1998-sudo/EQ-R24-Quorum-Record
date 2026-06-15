@@ -1,0 +1,1 @@
+# EQ-R24-Quorum-Record
