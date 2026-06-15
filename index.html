@@ -20,19 +20,17 @@
   button{font-family:inherit;cursor:pointer;border:none}
   input,select,textarea{font-family:inherit;font-size:14px}
 
-  /* ---------- GATE (loading + login) ---------- */
   #gate{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
-    background:radial-gradient(120% 120% at 50% 0%,#26305a 0%,var(--ink) 45%,var(--ink2) 100%);
-    z-index:50;padding:24px}
+    background:radial-gradient(120% 120% at 50% 0%,#26305a 0%,var(--ink) 45%,var(--ink2) 100%);z-index:50;padding:24px}
   .gatecard{width:100%;max-width:380px;text-align:center;color:#f3eedf}
-  .crest{width:62px;height:62px;margin:0 auto 18px;border:2px solid var(--gold);
-    border-radius:50%;display:flex;align-items:center;justify-content:center}
+  .crest{width:62px;height:62px;margin:0 auto 18px;border:2px solid var(--gold);border-radius:50%;
+    display:flex;align-items:center;justify-content:center}
   .crest svg{width:30px;height:30px;fill:var(--gold)}
   .gatecard h1{font-size:25px;font-weight:600;letter-spacing:.5px;margin-bottom:6px}
   .gatecard .sub{font-size:12.5px;color:#b9c0d8;margin-bottom:6px;letter-spacing:.4px}
   .gatecard .sacred{font-size:11.5px;color:#8c95b6;font-style:italic;margin-bottom:26px}
-  .gate-in{width:100%;padding:13px 16px;border-radius:11px;border:1px solid #3a426a;
-    background:#1b2240;color:#fff;font-size:15px;margin-bottom:11px}
+  .gate-in{width:100%;padding:13px 16px;border-radius:11px;border:1px solid #3a426a;background:#1b2240;
+    color:#fff;font-size:15px;margin-bottom:11px}
   .gate-in::placeholder{color:#6c7498}
   .gate-in:focus{outline:none;border-color:var(--gold)}
   .gatebtn{width:100%;margin-top:4px;padding:13px;border-radius:11px;background:var(--gold);
@@ -41,18 +39,16 @@
   .gatebtn[disabled]{opacity:.6;cursor:default}
   .gatemsg{min-height:18px;margin-top:14px;font-size:12.5px;color:#e8b9b9}
   .gatemsg.good{color:#a9d8bf}
+  .gatemsg.info{color:#cdb98a}
   .forgot{margin-top:14px;font-size:12px;color:#8e97bd;background:none;text-decoration:underline}
   .spinner{width:34px;height:34px;border:3px solid rgba(255,255,255,.18);border-top-color:var(--gold);
     border-radius:50%;margin:30px auto 0;animation:spin .8s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
 
-  /* ---------- APP ---------- */
   #app{display:none;min-height:100vh;flex-direction:column}
-  header.topbar{background:var(--ink);color:#fff;padding:0 16px;position:sticky;top:0;z-index:20;
-    box-shadow:0 2px 12px rgba(0,0,0,.18)}
+  header.topbar{background:var(--ink);color:#fff;padding:0 16px;position:sticky;top:0;z-index:20;box-shadow:0 2px 12px rgba(0,0,0,.18)}
   .topinner{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:14px;height:58px}
-  .brand{display:flex;align-items:center;gap:10px;font-family:Georgia,serif;font-size:17px;font-weight:600;
-    letter-spacing:.3px;white-space:nowrap}
+  .brand{display:flex;align-items:center;gap:10px;font-family:Georgia,serif;font-size:17px;font-weight:600;letter-spacing:.3px;white-space:nowrap}
   .brand svg{width:20px;height:20px;fill:var(--gold)}
   nav.tabs{display:flex;gap:4px;margin-left:8px;flex:1}
   nav.tabs button{background:transparent;color:#c2c8de;padding:8px 14px;border-radius:8px;font-size:13.5px;font-weight:500}
@@ -60,38 +56,32 @@
   .lockout{background:rgba(255,255,255,.08);color:#dfe3f0;padding:8px 12px;border-radius:8px;font-size:12.5px}
 
   main{max-width:1180px;margin:0 auto;width:100%;padding:22px 16px 60px;flex:1}
-  .view{display:none}
-  .view.active{display:block}
+  .view{display:none}.view.active{display:block}
   .vhead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap}
   .vhead h2{font-family:Georgia,serif;font-size:21px;color:var(--ink);font-weight:600}
   .vhead .note{font-size:12px;color:var(--muted)}
 
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:14px}
-  .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 16px 14px;
-    box-shadow:var(--shadow);position:relative;overflow:hidden}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 16px 14px;box-shadow:var(--shadow);position:relative;overflow:hidden}
   .stat::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--gold)}
-  .stat.alert::before{background:var(--danger)}
-  .stat.info::before{background:var(--info)}
+  .stat.alert::before{background:var(--danger)}.stat.info::before{background:var(--info)}
   .stat .n{font-family:Georgia,serif;font-size:30px;font-weight:700;color:var(--ink);line-height:1}
   .stat .l{font-size:11.5px;color:var(--muted);margin-top:7px;letter-spacing:.2px}
-  .sectlabel{font-size:11.5px;font-weight:700;letter-spacing:1.2px;color:var(--gold);
-    text-transform:uppercase;margin:26px 0 12px}
+  .sectlabel{font-size:11.5px;font-weight:700;letter-spacing:1.2px;color:var(--gold);text-transform:uppercase;margin:26px 0 12px}
   .sectlabel:first-child{margin-top:0}
 
   .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
   .toolbar input[type=text],.toolbar select{padding:9px 12px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--text)}
   .toolbar input[type=text]{flex:1;min-width:160px}
   .btn{padding:9px 16px;border-radius:9px;font-weight:600;font-size:13.5px}
-  .btn.primary{background:var(--ink);color:#fff}
-  .btn.gold{background:var(--gold);color:#241c08}
+  .btn.primary{background:var(--ink);color:#fff}.btn.gold{background:var(--gold);color:#241c08}
   .btn.ghost{background:#fff;border:1px solid var(--line);color:var(--text)}
   .btn.danger{background:#fff;border:1px solid var(--danger);color:var(--danger)}
   .btn:active{transform:translateY(1px)}
 
   .tablewrap{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:auto}
-  table{width:100%;border-collapse:collapse;font-size:13px;min-width:760px}
-  thead th{background:#2a3358;color:#e9e3d2;text-align:left;padding:11px 12px;font-weight:600;font-size:11.5px;
-    letter-spacing:.4px;white-space:nowrap;position:sticky;top:0}
+  table{width:100%;border-collapse:collapse;font-size:13px;min-width:840px}
+  thead th{background:#2a3358;color:#e9e3d2;text-align:left;padding:11px 12px;font-weight:600;font-size:11.5px;letter-spacing:.4px;white-space:nowrap;position:sticky;top:0}
   tbody td{padding:10px 12px;border-top:1px solid var(--line);vertical-align:middle}
   tbody tr{cursor:pointer}
   tbody tr:hover{background:#faf7ef}
@@ -101,60 +91,66 @@
   .empty{padding:46px 20px;text-align:center;color:var(--muted);font-size:14px}
 
   .badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
-  .b-ok{background:#e4f1ea;color:var(--ok)} .b-warn{background:#f7ecd2;color:var(--warn)}
-  .b-danger{background:#f6e1e1;color:var(--danger)} .b-info{background:#e3ebf6;color:var(--info)}
-  .b-gold{background:var(--gold-soft);color:#7a5e1d} .b-grey{background:#edeef1;color:var(--muted)}
+  .b-ok{background:#e4f1ea;color:var(--ok)}.b-warn{background:#f7ecd2;color:var(--warn)}
+  .b-danger{background:#f6e1e1;color:var(--danger)}.b-info{background:#e3ebf6;color:var(--info)}
+  .b-gold{background:var(--gold-soft);color:#7a5e1d}.b-grey{background:#edeef1;color:var(--muted)}
 
-  .overlay{position:fixed;inset:0;background:rgba(20,26,48,.55);display:none;align-items:flex-start;
-    justify-content:center;z-index:40;padding:24px 14px;overflow:auto}
+  .overlay{position:fixed;inset:0;background:rgba(20,26,48,.55);display:none;align-items:flex-start;justify-content:center;z-index:40;padding:24px 14px;overflow:auto}
   .overlay.show{display:flex}
-  .modal{background:#fff;border-radius:16px;width:100%;max-width:680px;box-shadow:0 18px 50px rgba(0,0,0,.3);overflow:hidden;margin:auto}
+  .modal{background:#fff;border-radius:16px;width:100%;max-width:700px;box-shadow:0 18px 50px rgba(0,0,0,.3);overflow:hidden;margin:auto}
   .mhead{background:var(--ink);color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center}
   .mhead h3{font-family:Georgia,serif;font-size:18px;font-weight:600}
   .mhead .x{background:rgba(255,255,255,.12);color:#fff;width:30px;height:30px;border-radius:8px;font-size:18px}
-  .mbody{padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:14px 16px}
+  .mbody{padding:20px;display:block;max-height:70vh;overflow:auto}
+
+  .wzsec{margin-top:18px;border-top:1px solid var(--line);padding-top:15px}
+  .wzsec:first-child{margin-top:0;border-top:none;padding-top:0}
+  .wzsec h4{font-size:11.5px;font-weight:700;letter-spacing:1px;color:var(--gold);text-transform:uppercase;margin-bottom:3px}
+  .wzsec .hint{font-size:11.5px;color:var(--muted);font-style:italic;margin-bottom:11px}
+  .secgrid{display:grid;grid-template-columns:1fr 1fr;gap:13px 16px}
+  .cond{grid-column:1/-1}
+  .cond.hidden{display:none}
   .fld{display:flex;flex-direction:column;gap:5px}
   .fld.full{grid-column:1/-1}
   .fld label{font-size:11.5px;font-weight:700;color:var(--muted);letter-spacing:.3px;text-transform:uppercase}
   .fld input,.fld select,.fld textarea{padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--text)}
-  .fld textarea{resize:vertical;min-height:58px}
+  .fld textarea{resize:vertical;min-height:54px}
   .fld input:focus,.fld select:focus,.fld textarea:focus{outline:none;border-color:var(--gold)}
-  .mfoot{padding:14px 20px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:10px}
+  .stepnote{grid-column:1/-1;background:#eef3fb;border:1px solid #d4e0f2;border-radius:9px;padding:9px 12px;font-size:12px;color:var(--info)}
 
+  .flagpanel{background:#fbf7ee;border:1px solid var(--gold-line);border-radius:11px;padding:13px 15px;margin-top:18px}
+  .flagpanel .ttl{font-size:11px;font-weight:700;letter-spacing:.6px;color:#7a5e1d;text-transform:uppercase;margin-bottom:9px}
+  .flagpanel .none{font-size:12.5px;color:var(--ok)}
+  .flagchips{display:flex;flex-wrap:wrap;gap:7px}
+
+  .mfoot{padding:14px 20px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:10px}
   .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;box-shadow:var(--shadow);max-width:560px;margin-bottom:16px}
   .panel h3{font-family:Georgia,serif;font-size:16px;color:var(--ink);margin-bottom:6px}
   .panel p{font-size:12.5px;color:var(--muted);margin-bottom:14px}
   .panel .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
   .smsg{font-size:12.5px;margin-top:10px;min-height:16px}
-  .smsg.ok{color:var(--ok)} .smsg.err{color:var(--danger)}
-  .who{font-size:13px;color:var(--text)}
-  .who b{color:var(--ink)}
-  .privacy{background:#fbf7ee;border:1px solid var(--gold-line);border-radius:12px;padding:14px 16px;
-    font-size:12.5px;color:#6a5a32;max-width:560px;margin-bottom:20px;line-height:1.6}
+  .smsg.ok{color:var(--ok)}.smsg.err{color:var(--danger)}
+  .who{font-size:13px;color:var(--text)}.who b{color:var(--ink)}
+  .privacy{background:#fbf7ee;border:1px solid var(--gold-line);border-radius:12px;padding:14px 16px;font-size:12.5px;color:#6a5a32;max-width:560px;margin-bottom:20px;line-height:1.6}
   .privacy b{color:#5a4a22}
 
   @media(max-width:640px){
-    .mbody{grid-template-columns:1fr}
+    .secgrid{grid-template-columns:1fr}
     .topinner{height:auto;padding:10px 0;flex-wrap:wrap}
-    nav.tabs{order:3;width:100%;margin-left:0}
-    nav.tabs button{flex:1}
+    nav.tabs{order:3;width:100%;margin-left:0}nav.tabs button{flex:1}
   }
 </style>
 </head>
 <body>
 
-<!-- ===================== GATE ===================== -->
+<!-- GATE -->
 <div id="gate">
   <div class="gatecard">
-    <div class="crest">
-      <svg viewBox="0 0 24 24"><path d="M12 2l2.4 5.2L20 8l-4 4 1 6-5-2.8L7 18l1-6-4-4 5.6-.8L12 2z"/></svg>
-    </div>
+    <div class="crest"><svg viewBox="0 0 24 24"><path d="M12 2l2.4 5.2L20 8l-4 4 1 6-5-2.8L7 18l1-6-4-4 5.6-.8L12 2z"/></svg></div>
     <h1 class="serif">Quorum Ordinance Record</h1>
     <div class="sub">Elders Quorum Presidency</div>
     <div class="sacred">Held in confidence — authorized members only</div>
-
     <div id="gateLoading"><div class="spinner"></div></div>
-
     <div id="gateLogin" style="display:none">
       <input id="email" class="gate-in" type="email" placeholder="Email" autocomplete="username">
       <input id="password" class="gate-in" type="password" placeholder="Password" autocomplete="current-password">
@@ -165,14 +161,11 @@
   </div>
 </div>
 
-<!-- ===================== APP ===================== -->
+<!-- APP -->
 <div id="app">
   <header class="topbar">
     <div class="topinner">
-      <div class="brand serif">
-        <svg viewBox="0 0 24 24"><path d="M12 2l2.4 5.2L20 8l-4 4 1 6-5-2.8L7 18l1-6-4-4 5.6-.8L12 2z"/></svg>
-        Quorum Ordinance Record
-      </div>
+      <div class="brand serif"><svg viewBox="0 0 24 24"><path d="M12 2l2.4 5.2L20 8l-4 4 1 6-5-2.8L7 18l1-6-4-4 5.6-.8L12 2z"/></svg> Quorum Ordinance Record</div>
       <nav class="tabs">
         <button data-view="dash" class="active">Dashboard</button>
         <button data-view="roster">Brethren</button>
@@ -181,32 +174,25 @@
       <button class="lockout" id="signoutBtn">Sign Out</button>
     </div>
   </header>
-
   <main>
     <section class="view active" id="view-dash">
-      <div class="vhead">
-        <h2 class="serif">Presidency Overview</h2>
-        <span class="note" id="updatedNote"></span>
-      </div>
-      <div class="sectlabel">Roster &amp; Records</div>
-      <div class="grid" id="cardsRoster"></div>
-      <div class="sectlabel">Priesthood Progression</div>
-      <div class="grid" id="cardsPriest"></div>
-      <div class="sectlabel">Temple &amp; Ordinances</div>
-      <div class="grid" id="cardsTemple"></div>
+      <div class="vhead"><h2 class="serif">Presidency Overview</h2><span class="note" id="updatedNote"></span></div>
+      <div class="sectlabel">Roster &amp; Records</div><div class="grid" id="cardsRoster"></div>
+      <div class="sectlabel">Priesthood Progression</div><div class="grid" id="cardsPriest"></div>
+      <div class="sectlabel">Temple &amp; Ordinances</div><div class="grid" id="cardsTemple"></div>
+      <div class="sectlabel">Flags &amp; Follow-Up</div><div class="grid" id="cardsFlags"></div>
     </section>
 
     <section class="view" id="view-roster">
-      <div class="vhead">
-        <h2 class="serif">Brethren</h2>
-        <button class="btn gold" id="addBtn">+ Add Brother</button>
-      </div>
+      <div class="vhead"><h2 class="serif">Brethren</h2><button class="btn gold" id="addBtn">+ Add Brother</button></div>
       <div class="toolbar">
         <input type="text" id="search" placeholder="Search by name…">
         <select id="filter">
           <option value="all">All brethren</option>
-          <option value="transfer">Records: transfer needed</option>
+          <option value="flagged">Has follow-up flag</option>
+          <option value="transfer">Records transfer pending</option>
           <option value="expired">Active w/ expired recommend</option>
+          <option value="outreach">Temple class — needs outreach</option>
           <option value="prep">In temple prep class</option>
           <option value="endow">Next ordinance: Endowment</option>
           <option value="prospect">Prospective elders</option>
@@ -218,7 +204,7 @@
           <thead><tr>
             <th>Name</th><th>Boundaries</th><th>Records</th><th>Activity</th>
             <th>Office</th><th>Next Office</th><th>Recommend</th><th>Renewal</th>
-            <th>Temple Prep</th><th>Next Ordinance</th>
+            <th>Temple Prep</th><th>Next Ordinance</th><th>Action</th>
           </tr></thead>
           <tbody id="rosterBody"></tbody>
         </table>
@@ -227,25 +213,15 @@
 
     <section class="view" id="view-settings">
       <div class="vhead"><h2 class="serif">Settings</h2></div>
-      <div class="privacy">
-        <b>Where your data lives:</b> Brethren records are stored in your private Firebase project and
-        synced live across the presidency. Access requires a signed-in, authorized account, enforced by
-        Firestore security rules. Nothing is stored inside the file on GitHub.
-      </div>
-
+      <div class="privacy"><b>Where your data lives:</b> Brethren records are stored in your private Firebase project and synced live across the presidency. Access requires a signed-in, authorized account, enforced by Firestore security rules. The session signs out automatically after 30 minutes of inactivity.</div>
       <div class="panel">
-        <h3>Signed In</h3>
-        <p>You are signed in to the quorum record.</p>
+        <h3>Signed In</h3><p>You are signed in to the quorum record.</p>
         <div class="who">Account: <b id="meEmail">—</b></div>
-        <div class="row" style="margin-top:14px">
-          <button class="btn ghost" id="resetPwBtn">Send password reset email</button>
-        </div>
+        <div class="row" style="margin-top:14px"><button class="btn ghost" id="resetPwBtn">Send password reset email</button></div>
         <div class="smsg" id="pwMsg"></div>
       </div>
-
       <div class="panel">
-        <h3>Backup &amp; Migration</h3>
-        <p>Export a JSON backup of all brethren, or import records (e.g. from the offline version) into the cloud.</p>
+        <h3>Backup &amp; Migration</h3><p>Export a JSON backup of all brethren, or import records into the cloud.</p>
         <div class="row">
           <button class="btn gold" id="exportBtn">Export backup</button>
           <button class="btn ghost" id="importBtn">Import into cloud</button>
@@ -257,13 +233,10 @@
   </main>
 </div>
 
-<!-- ===================== EDIT MODAL ===================== -->
+<!-- MODAL -->
 <div class="overlay" id="overlay">
   <div class="modal">
-    <div class="mhead">
-      <h3 class="serif" id="modalTitle">Add Brother</h3>
-      <button class="x" id="closeModal">&times;</button>
-    </div>
+    <div class="mhead"><h3 class="serif" id="modalTitle">Add Brother</h3><button class="x" id="closeModal">&times;</button></div>
     <div class="mbody" id="modalBody"></div>
     <div class="mfoot">
       <button class="btn danger" id="deleteBtn" style="visibility:hidden">Delete</button>
@@ -282,7 +255,6 @@ import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendP
 import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-/* ===================== FIREBASE CONFIG ===================== */
 const firebaseConfig = {
   apiKey: "AIzaSyAEO5e24Pl1-Jqu_NIVSTUhhVMQ_exYCy4",
   authDomain: "eq24-a5fc8.firebaseapp.com",
@@ -295,112 +267,97 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const COL = "brethren";
+const STALE_DAYS = 21; // temple class "not attended in a while" threshold
 
-/* ===================== OPTION LISTS ===================== */
 const OPTS = {
-  boundaries: ["Yes","No"],
-  records: ["In Ward — OK","Transfer In Needed","Transfer Out Needed","Address Unknown","Out — Notify Clerk"],
-  activity: ["Active","Semi-Active","Less-Active","Inactive","New Move-In"],
-  office: ["Unordained","Deacon","Teacher","Priest","Prospective Elder","Elder","High Priest"],
-  nextOffice: ["None","Ordain Teacher","Ordain Priest","Ordain Elder","Ordain High Priest"],
-  recommend: ["Current","Expired","Never Held","N/A"],
-  recommendType: ["Full","Limited-Use","None"],
-  templePrep: ["Not Enrolled","Enrolled","Attending","Attended — Not Complete","Completed"],
-  nextOrdinance: ["None","Melchizedek Ordination","Endowment","Sealing — Spouse","Sealing — Family","Other"]
+  boundaries:["Yes","No"],
+  homeTransfer:["Not started","Address located","Records transfer requested","Records transferred"],
+  activity:["Active","Semi-Active","Less-Active","Inactive","New Move-In"],
+  office:["Unordained","Deacon","Teacher","Priest","Prospective Elder","Elder","High Priest"],
+  nextOffice:["None","Ordain Teacher","Ordain Priest","Ordain Elder","Ordain High Priest"],
+  recommend:["Current","Expired","Never Held","N/A"],
+  recommendType:["Full","Limited-Use","None"],
+  templePrep:["Not Enrolled","Enrolled","Attending","Attended — Not Complete","Completed"],
+  nextOrdinance:["None","Priesthood Advancement","Temple Recommend — Baptisms for the Dead","Patriarchal Blessing","Endowment","Sealing — Spouse","Sealing — Family","Other"]
 };
-const FIELDS = [
-  {k:"name",l:"Full Name",t:"text"},
-  {k:"phone",l:"Phone",t:"text"},
-  {k:"boundaries",l:"In Ward Boundaries",t:"sel",opt:"boundaries"},
-  {k:"records",l:"Records Status",t:"sel",opt:"records"},
-  {k:"activity",l:"Activity",t:"sel",opt:"activity"},
-  {k:"office",l:"Current Priesthood Office",t:"sel",opt:"office"},
-  {k:"nextOffice",l:"Next Priesthood Office",t:"sel",opt:"nextOffice"},
-  {k:"nextSteps",l:"Next Steps (advancement)",t:"area",full:true},
-  {k:"recommend",l:"Temple Recommend Status",t:"sel",opt:"recommend"},
-  {k:"recommendType",l:"Recommend Type",t:"sel",opt:"recommendType"},
-  {k:"expires",l:"Recommend Expires",t:"date"},
-  {k:"templePrep",l:"Temple Prep Class",t:"sel",opt:"templePrep"},
-  {k:"nextOrdinance",l:"Next Ordinance Needed",t:"sel",opt:"nextOrdinance"},
-  {k:"ministering",l:"Ministering Brother(s)",t:"text"},
-  {k:"notes",l:"Notes",t:"area",full:true}
-];
 
-let data = [];
-let editingId = null;
-let unsub = null;
+let data = [], editingId = null, unsub = null;
 const $ = function(id){ return document.getElementById(id); };
-function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
+function isActiveVal(a){ return a==="Active"||a==="Semi-Active"; }
+function daysSince(d){ const x=new Date(d); return isNaN(x)?null:(Date.now()-x)/86400000; }
+
+/* ===================== IDLE TIMEOUT (30 min) ===================== */
+let idleTimer=null;
+const IDLE_MS = 30*60*1000;
+function clearIdle(){ if(idleTimer){ clearTimeout(idleTimer); idleTimer=null; } }
+function armIdle(){
+  if(!auth.currentUser) return;
+  clearIdle();
+  idleTimer=setTimeout(function(){
+    try{ sessionStorage.setItem("qor_idle","1"); }catch(e){}
+    signOut(auth);
+  }, IDLE_MS);
+}
+["mousemove","keydown","click","touchstart","scroll"].forEach(function(ev){
+  document.addEventListener(ev, function(){ if(auth.currentUser) armIdle(); }, {passive:true});
+});
 
 /* ===================== AUTH GATE ===================== */
 const gate=$("gate"), appEl=$("app"), gateLoading=$("gateLoading"), gateLogin=$("gateLogin"), gateMsg=$("gateMsg");
-
 onAuthStateChanged(auth, function(user){
   if(user){
-    gate.style.display="none";
-    appEl.style.display="flex";
-    $("meEmail").textContent = user.email || "(unknown)";
-    startSync();
+    gate.style.display="none"; appEl.style.display="flex";
+    $("meEmail").textContent=user.email||"(unknown)";
+    armIdle(); startSync();
   }else{
+    clearIdle();
     if(unsub){ unsub(); unsub=null; }
-    appEl.style.display="none";
-    gate.style.display="flex";
-    gateLoading.style.display="none";
-    gateLogin.style.display="block";
+    appEl.style.display="none"; gate.style.display="flex";
+    gateLoading.style.display="none"; gateLogin.style.display="block";
+    let idledOut=false; try{ idledOut=sessionStorage.getItem("qor_idle")==="1"; sessionStorage.removeItem("qor_idle"); }catch(e){}
+    if(idledOut){ gateMsg.className="gatemsg info"; gateMsg.textContent="Signed out after 30 minutes of inactivity."; }
     $("email").focus();
   }
 });
-
 function authError(code){
-  const map={
-    "auth/invalid-email":"That email address isn't valid.",
-    "auth/invalid-credential":"Email or password is incorrect.",
-    "auth/wrong-password":"Email or password is incorrect.",
-    "auth/user-not-found":"No account found for that email.",
-    "auth/too-many-requests":"Too many attempts. Please wait a moment and try again.",
-    "auth/network-request-failed":"Network error. Check your connection."
-  };
-  return map[code] || "Sign-in failed. Please try again.";
+  const map={"auth/invalid-email":"That email address isn't valid.","auth/invalid-credential":"Email or password is incorrect.",
+    "auth/wrong-password":"Email or password is incorrect.","auth/user-not-found":"No account found for that email.",
+    "auth/too-many-requests":"Too many attempts. Please wait a moment and try again.","auth/network-request-failed":"Network error. Check your connection."};
+  return map[code]||"Sign-in failed. Please try again.";
 }
-
 $("signinBtn").addEventListener("click", doSignin);
 $("password").addEventListener("keydown", function(e){ if(e.key==="Enter") doSignin(); });
 $("email").addEventListener("keydown", function(e){ if(e.key==="Enter") $("password").focus(); });
-
 function doSignin(){
   const em=$("email").value.trim(), pw=$("password").value;
-  if(!em || !pw){ gateMsg.className="gatemsg"; gateMsg.textContent="Enter your email and password."; return; }
+  if(!em||!pw){ gateMsg.className="gatemsg"; gateMsg.textContent="Enter your email and password."; return; }
   $("signinBtn").disabled=true; gateMsg.textContent="";
-  signInWithEmailAndPassword(auth, em, pw)
-    .then(function(){ $("password").value=""; })
+  signInWithEmailAndPassword(auth,em,pw).then(function(){ $("password").value=""; })
     .catch(function(err){ gateMsg.className="gatemsg"; gateMsg.textContent=authError(err.code); })
     .finally(function(){ $("signinBtn").disabled=false; });
 }
-
 $("forgotBtn").addEventListener("click", function(){
   const em=$("email").value.trim();
   if(!em){ gateMsg.className="gatemsg"; gateMsg.textContent="Enter your email above first, then tap Forgot password."; return; }
-  sendPasswordResetEmail(auth, em)
-    .then(function(){ gateMsg.className="gatemsg good"; gateMsg.textContent="Reset email sent — check your inbox."; })
+  sendPasswordResetEmail(auth,em).then(function(){ gateMsg.className="gatemsg good"; gateMsg.textContent="Reset email sent — check your inbox."; })
     .catch(function(err){ gateMsg.className="gatemsg"; gateMsg.textContent=authError(err.code); });
 });
-
 $("signoutBtn").addEventListener("click", function(){ signOut(auth); });
 
-/* ===================== FIRESTORE SYNC ===================== */
+/* ===================== FIRESTORE ===================== */
 function startSync(){
   if(unsub) return;
-  unsub = onSnapshot(collection(db, COL), function(snap){
-    data = [];
-    snap.forEach(function(d){ const o=d.data(); o.id=d.id; data.push(o); });
+  unsub=onSnapshot(collection(db,COL), function(snap){
+    data=[]; snap.forEach(function(d){ const o=d.data(); o.id=d.id; data.push(o); });
     data.sort(function(a,b){ return (a.name||"").localeCompare(b.name||""); });
     renderAll();
   }, function(err){
-    $("rosterBody").innerHTML = '<tr><td colspan="10" class="empty">Could not load records: '+esc(err.code||err.message)+'. Check Firestore rules / authorization.</td></tr>';
+    $("rosterBody").innerHTML='<tr><td colspan="11" class="empty">Could not load records: '+esc(err.code||err.message)+'. Check Firestore rules / authorization.</td></tr>';
   });
 }
-function writeBrother(rec){ return setDoc(doc(db, COL, rec.id), rec, {merge:true}); }
-function removeBrother(id){ return deleteDoc(doc(db, COL, id)); }
+function writeBrother(rec){ return setDoc(doc(db,COL,rec.id),rec,{merge:true}); }
+function removeBrother(id){ return deleteDoc(doc(db,COL,id)); }
 
 /* ===================== NAV ===================== */
 document.querySelectorAll("nav.tabs button").forEach(function(b){
@@ -412,27 +369,40 @@ document.querySelectorAll("nav.tabs button").forEach(function(b){
   });
 });
 
-/* ===================== RENEWAL FLAG ===================== */
+/* ===================== FLAGS / RENEWAL ===================== */
 function renewalFlag(p){
-  const active=(p.activity==="Active"||p.activity==="Semi-Active");
-  if(!active) return {t:"—",c:"b-grey"};
+  if(!isActiveVal(p.activity)) return {t:"—",c:"b-grey"};
   if(p.recommend==="Expired") return {t:"RENEW",c:"b-danger"};
   if(p.recommend==="Current" && p.expires){
-    const d=new Date(p.expires);
-    if(!isNaN(d)){
-      const days=(d-new Date())/86400000;
-      if(days<=90) return {t:"Expiring <90d",c:"b-warn"};
-      return {t:"OK",c:"b-ok"};
-    }
+    const ds=daysSince(p.expires);
+    if(ds!==null){ if(ds>=-90) return {t:(ds>=0?"Expired":"Expiring <90d"),c:(ds>=0?"b-danger":"b-warn")}; return {t:"OK",c:"b-ok"}; }
   }
   if(p.recommend==="Current") return {t:"OK",c:"b-ok"};
   return {t:"—",c:"b-grey"};
+}
+function computeFlags(p){
+  const f=[];
+  if(p.boundaries==="No"){
+    if(!p.newAddress) f.push({t:"Locate home address",c:"b-warn"});
+    if(p.homeTransfer!=="Records transferred") f.push({t:"Clerk: transfer records",c:"b-warn"});
+  }
+  if(p.boundaries==="Yes" && isActiveVal(p.activity) && p.recommend && p.recommend!=="Current"){
+    f.push({t:"Recommend not active"+(p.recommendInactiveReason?": "+p.recommendInactiveReason:" — log reason"),c:"b-danger"});
+  }
+  if(p.templePrep==="Enrolled"||p.templePrep==="Attending"){
+    if(!p.templeLastAttended) f.push({t:"Confirm class attendance",c:"b-warn"});
+    else{ const ds=daysSince(p.templeLastAttended); if(ds!==null && ds>STALE_DAYS) f.push({t:"Reach out — class lapsed",c:"b-danger"}); }
+  }
+  if(p.boundaries==="No"){ /* records transfer counts above */ }
+  if(isActiveVal(p.activity) && p.recommend==="Expired") {/* covered by renewal */}
+  return f;
 }
 
 /* ===================== DASHBOARD ===================== */
 function cnt(fn){ return data.filter(fn).length; }
 function renderDash(){
   const inPrep=function(p){ return p.templePrep==="Enrolled"||p.templePrep==="Attending"||p.templePrep==="Attended — Not Complete"; };
+  const outreach=function(p){ if(p.templePrep!=="Enrolled"&&p.templePrep!=="Attending") return false; if(!p.templeLastAttended) return true; const ds=daysSince(p.templeLastAttended); return ds!==null&&ds>STALE_DAYS; };
   const roster=[
     ["Brethren Tracked",data.length,""],
     ["In Ward Boundaries",cnt(function(p){return p.boundaries==="Yes";}),""],
@@ -443,90 +413,178 @@ function renderDash(){
     ["Elders",cnt(function(p){return p.office==="Elder";}),""],
     ["High Priests",cnt(function(p){return p.office==="High Priest";}),""],
     ["Prospective Elders",cnt(function(p){return p.office==="Prospective Elder";}),"info"],
-    ["Advancement In Progress",cnt(function(p){return p.nextOffice && p.nextOffice!=="None";}),"info"]
+    ["Advancement In Progress",cnt(function(p){return p.nextOffice&&p.nextOffice!=="None";}),"info"]
   ];
   const temple=[
-    ["Active w/ Expired Recommend",cnt(function(p){return (p.activity==="Active"||p.activity==="Semi-Active")&&p.recommend==="Expired";}),"alert"],
+    ["Active w/ Expired Recommend",cnt(function(p){return isActiveVal(p.activity)&&p.recommend==="Expired";}),"alert"],
     ["In Temple Prep Class",cnt(inPrep),""],
     ["Need Endowment (next)",cnt(function(p){return p.nextOrdinance==="Endowment";}),"info"],
     ["Need Sealing (next)",cnt(function(p){return p.nextOrdinance==="Sealing — Spouse"||p.nextOrdinance==="Sealing — Family";}),"info"]
   ];
-  function fill(id,arr){
-    $(id).innerHTML = arr.map(function(c){ return '<div class="stat '+c[2]+'"><div class="n">'+c[1]+'</div><div class="l">'+c[0]+'</div></div>'; }).join("");
-  }
-  fill("cardsRoster",roster); fill("cardsPriest",priest); fill("cardsTemple",temple);
-  $("updatedNote").textContent = data.length ? (data.length+" brethren on record") : "No brethren entered yet";
+  const flags=[
+    ["Brethren Flagged",cnt(function(p){return computeFlags(p).length>0;}),"alert"],
+    ["Records Transfer Pending",cnt(function(p){return p.boundaries==="No"&&p.homeTransfer!=="Records transferred";}),"alert"],
+    ["Recommend Inactive (active)",cnt(function(p){return isActiveVal(p.activity)&&p.recommend&&p.recommend!=="Current";}),"alert"],
+    ["Temple Class Outreach",cnt(outreach),"alert"]
+  ];
+  function fill(id,arr){ $(id).innerHTML=arr.map(function(c){return '<div class="stat '+c[2]+'"><div class="n">'+c[1]+'</div><div class="l">'+c[0]+'</div></div>';}).join(""); }
+  fill("cardsRoster",roster); fill("cardsPriest",priest); fill("cardsTemple",temple); fill("cardsFlags",flags);
+  $("updatedNote").textContent=data.length?(data.length+" brethren on record"):"No brethren entered yet";
 }
 
 /* ===================== ROSTER ===================== */
-function badge(val,map){ return '<span class="badge '+(map[val]||"b-grey")+'">'+(val||"—")+'</span>'; }
+function badge(val,map){ return '<span class="badge '+(map[val]||"b-grey")+'">'+(esc(val)||"—")+'</span>'; }
 const recMap={"Current":"b-ok","Expired":"b-danger","Never Held":"b-grey","N/A":"b-grey"};
 const actMap={"Active":"b-ok","Semi-Active":"b-warn","Less-Active":"b-warn","Inactive":"b-grey","New Move-In":"b-info"};
 const prepMap={"Completed":"b-ok","Attending":"b-info","Enrolled":"b-info","Attended — Not Complete":"b-warn","Not Enrolled":"b-grey"};
-const ordMap={"Endowment":"b-gold","Sealing — Spouse":"b-gold","Sealing — Family":"b-gold","Melchizedek Ordination":"b-gold","Other":"b-info","None":"b-grey"};
+const ordMap={"Endowment":"b-gold","Sealing — Spouse":"b-gold","Sealing — Family":"b-gold","Patriarchal Blessing":"b-gold","Temple Recommend — Baptisms for the Dead":"b-info","Priesthood Advancement":"b-info","Other":"b-info","None":"b-grey"};
 const offMap={"Elder":"b-ok","High Priest":"b-ok","Prospective Elder":"b-info"};
 
 function passesFilter(p,f){
   switch(f){
-    case "transfer": return /Transfer/.test(p.records||"");
-    case "expired": return (p.activity==="Active"||p.activity==="Semi-Active")&&p.recommend==="Expired";
+    case "flagged": return computeFlags(p).length>0;
+    case "transfer": return p.boundaries==="No"&&p.homeTransfer!=="Records transferred";
+    case "expired": return isActiveVal(p.activity)&&p.recommend==="Expired";
+    case "outreach": { if(p.templePrep!=="Enrolled"&&p.templePrep!=="Attending") return false; if(!p.templeLastAttended) return true; const ds=daysSince(p.templeLastAttended); return ds!==null&&ds>STALE_DAYS; }
     case "prep": return p.templePrep==="Enrolled"||p.templePrep==="Attending"||p.templePrep==="Attended — Not Complete";
     case "endow": return p.nextOrdinance==="Endowment";
     case "prospect": return p.office==="Prospective Elder";
-    case "advance": return p.nextOffice && p.nextOffice!=="None";
+    case "advance": return p.nextOffice&&p.nextOffice!=="None";
     default: return true;
   }
 }
 function renderRoster(){
   const q=$("search").value.toLowerCase(), f=$("filter").value;
-  const rows=data.filter(function(p){ return passesFilter(p,f) && (!q || (p.name||"").toLowerCase().indexOf(q)>=0); });
+  const rows=data.filter(function(p){ return passesFilter(p,f)&&(!q||(p.name||"").toLowerCase().indexOf(q)>=0); });
   const body=$("rosterBody");
-  if(!rows.length){ body.innerHTML='<tr><td colspan="10" class="empty">No brethren match. Use “+ Add Brother” to begin.</td></tr>'; return; }
-  body.innerHTML = rows.map(function(p){
+  if(!rows.length){ body.innerHTML='<tr><td colspan="11" class="empty">No brethren match. Use “+ Add Brother” to begin.</td></tr>'; return; }
+  body.innerHTML=rows.map(function(p){
     const rf=renewalFlag(p);
-    const bnd = p.boundaries==="No" ? '<span class="badge b-warn">No</span>' : (p.boundaries==="Yes"?'<span class="badge b-ok">Yes</span>':'<span class="badge b-grey">—</span>');
-    const rec = /Transfer/.test(p.records||"") ? '<span class="badge b-warn">'+esc(p.records)+'</span>' : '<span class="badge b-grey">'+esc(p.records||"—")+'</span>';
+    const fl=computeFlags(p);
+    const bnd=p.boundaries==="No"?'<span class="badge b-warn">No</span>':(p.boundaries==="Yes"?'<span class="badge b-ok">Yes</span>':'<span class="badge b-grey">—</span>');
+    const rec=/Transfer/.test(p.records||"")?'<span class="badge b-warn">'+esc(p.records)+'</span>':'<span class="badge b-grey">'+esc(p.records||"—")+'</span>';
+    const action=fl.length?'<span class="badge b-danger" title="'+esc(fl.map(function(x){return x.t;}).join(" • "))+'">&#9873; '+fl.length+'</span>':'<span class="badge b-grey">—</span>';
     return '<tr data-id="'+esc(p.id)+'">'+
       '<td class="nm">'+esc(p.name||"—")+'</td>'+
-      '<td>'+bnd+'</td>'+
-      '<td>'+rec+'</td>'+
-      '<td>'+badge(p.activity,actMap)+'</td>'+
+      '<td>'+bnd+'</td>'+'<td>'+rec+'</td>'+'<td>'+badge(p.activity,actMap)+'</td>'+
       '<td>'+badge(p.office,offMap)+'</td>'+
       '<td>'+(p.nextOffice&&p.nextOffice!=="None"?'<span class="badge b-info">'+esc(p.nextOffice)+'</span>':'<span class="badge b-grey">—</span>')+'</td>'+
-      '<td>'+badge(p.recommend,recMap)+'</td>'+
-      '<td><span class="badge '+rf.c+'">'+rf.t+'</span></td>'+
-      '<td>'+badge(p.templePrep,prepMap)+'</td>'+
-      '<td>'+badge(p.nextOrdinance,ordMap)+'</td>'+
-    '</tr>';
+      '<td>'+badge(p.recommend,recMap)+'</td>'+'<td><span class="badge '+rf.c+'">'+rf.t+'</span></td>'+
+      '<td>'+badge(p.templePrep,prepMap)+'</td>'+'<td>'+badge(p.nextOrdinance,ordMap)+'</td>'+
+      '<td>'+action+'</td></tr>';
   }).join("");
   body.querySelectorAll("tr").forEach(function(tr){ tr.addEventListener("click", function(){ openModal(tr.dataset.id); }); });
 }
 $("search").addEventListener("input", renderRoster);
 $("filter").addEventListener("change", renderRoster);
 
-/* ===================== MODAL ===================== */
+/* ===================== GUIDED MODAL ===================== */
 const overlay=$("overlay"), modalBody=$("modalBody");
+function optTags(list,v){ return '<option value=""></option>'+list.map(function(o){return '<option'+(o===v?' selected':'')+'>'+o+'</option>';}).join(""); }
+function sel(key,list,v){ return '<select id="m_'+key+'" data-k="'+key+'">'+optTags(list,v||"")+'</select>'; }
+function txt(key,v){ return '<input type="text" id="m_'+key+'" data-k="'+key+'" value="'+esc(v||"")+'">'; }
+function dat(key,v){ return '<input type="date" id="m_'+key+'" data-k="'+key+'" value="'+esc(v||"")+'">'; }
+function area(key,v){ return '<textarea id="m_'+key+'" data-k="'+key+'">'+esc(v||"")+'</textarea>'; }
+function fld(label,inner,full){ return '<div class="fld'+(full?' full':'')+'"><label>'+label+'</label>'+inner+'</div>'; }
+
 function buildModal(p){
-  modalBody.innerHTML = FIELDS.map(function(fl){
-    const v=p[fl.k]||"", cls=fl.full?"fld full":"fld";
-    let ctrl;
-    if(fl.t==="sel"){
-      ctrl='<select data-k="'+fl.k+'"><option value=""></option>'+OPTS[fl.opt].map(function(o){return '<option'+(o===v?' selected':'')+'>'+o+'</option>';}).join("")+'</select>';
-    }else if(fl.t==="area"){
-      ctrl='<textarea data-k="'+fl.k+'">'+esc(v)+'</textarea>';
-    }else if(fl.t==="date"){
-      ctrl='<input type="date" data-k="'+fl.k+'" value="'+esc(v)+'">';
-    }else{
-      ctrl='<input type="text" data-k="'+fl.k+'" value="'+esc(v)+'">';
-    }
-    return '<div class="'+cls+'"><label>'+fl.l+'</label>'+ctrl+'</div>';
-  }).join("");
+  modalBody.innerHTML =
+    // Identity
+    '<div class="wzsec"><div class="secgrid">'+
+      fld("Full Name", txt("name",p.name))+
+      fld("Phone", txt("phone",p.phone))+
+    '</div></div>'+
+
+    // 1. BOUNDARIES
+    '<div class="wzsec"><h4>1 · Boundaries</h4><div class="hint">Are they within the ward boundaries?</div><div class="secgrid">'+
+      fld("In Ward Boundaries", sel("boundaries",OPTS.boundaries,p.boundaries))+
+      '<div class="cond hidden" id="condOut"><div class="secgrid">'+
+        '<div class="stepnote">Out of boundaries → step 1: find their current home address, then step 2: have the ward clerk transfer their records.</div>'+
+        fld("Current Home Address (locate)", txt("newAddress",p.newAddress), true)+
+        fld("Records / Clerk Transfer", sel("homeTransfer",OPTS.homeTransfer,p.homeTransfer))+
+      '</div></div>'+
+      '<div class="cond hidden" id="condIn"><div class="secgrid">'+
+        fld("Active?", sel("activity",OPTS.activity,p.activity))+
+        '<div class="cond hidden" id="condActive"><div class="secgrid">'+
+          fld("Current Calling", txt("calling",p.calling))+
+          '<div class="stepnote">Active → confirm temple recommend (section 3) and record their calling.</div>'+
+        '</div></div>'+
+        '<div class="cond hidden" id="condNotActive"><div class="secgrid">'+
+          '<div class="stepnote">Not active → guide toward the next ordinance: priesthood advancement → limited recommend (baptisms for the dead) → patriarchal blessing → endowment.</div>'+
+          fld("Next Ordinance (reactivation path)", sel("nextOrdinance",OPTS.nextOrdinance,p.nextOrdinance), true)+
+        '</div></div>'+
+      '</div></div>'+
+    '</div></div>'+
+
+    // 2. NEXT OFFICE
+    '<div class="wzsec"><h4>2 · Next Office (Priesthood Advancement)</h4><div class="hint">Current office and the path to the next one.</div><div class="secgrid">'+
+      fld("Current Priesthood Office", sel("office",OPTS.office,p.office))+
+      fld("Next Priesthood Office", sel("nextOffice",OPTS.nextOffice,p.nextOffice))+
+      fld("Next Steps (advancement)", area("nextSteps",p.nextSteps), true)+
+    '</div></div>'+
+
+    // 3. TEMPLE PREP & RECOMMEND
+    '<div class="wzsec"><h4>3 · Temple Prep &amp; Recommend</h4><div class="hint">Recommend status, renewal, and temple prep class.</div><div class="secgrid">'+
+      fld("Temple Recommend Status", sel("recommend",OPTS.recommend,p.recommend))+
+      fld("Recommend Type", sel("recommendType",OPTS.recommendType,p.recommendType))+
+      fld("Recommend Expires", dat("expires",p.expires))+
+      '<div class="cond hidden" id="condReason"><div class="secgrid">'+
+        fld("Reason recommend is not active / not renewed", txt("recommendInactiveReason",p.recommendInactiveReason), true)+
+      '</div></div>'+
+      fld("Temple Prep Class", sel("templePrep",OPTS.templePrep,p.templePrep))+
+      '<div class="cond hidden" id="condLastAttended"><div class="secgrid">'+
+        fld("Last Attended a Class", dat("templeLastAttended",p.templeLastAttended))+
+        '<div class="stepnote">If it has been more than '+STALE_DAYS+' days since the last class, this brother is flagged to reach out.</div>'+
+      '</div></div>'+
+      fld("Ministering Brother(s)", txt("ministering",p.ministering), true)+
+      fld("Notes", area("notes",p.notes), true)+
+    '</div></div>'+
+
+    // Flags
+    '<div class="flagpanel"><div class="ttl">Action Items &amp; Flags</div><div id="flagPanel"></div></div>';
+
+  ["m_boundaries","m_activity","m_recommend","m_templePrep"].forEach(function(id){
+    const el=$(id); if(el) el.addEventListener("change", updateConditionals);
+  });
+  modalBody.addEventListener("input", updateFlagsLive);
+  updateConditionals();
+}
+function show(id,on){ const el=$(id); if(el) el.classList.toggle("hidden", !on); }
+function mval(id){ const el=$(id); return el?el.value.trim():""; }
+function updateConditionals(){
+  const b=mval("m_boundaries");
+  show("condOut", b==="No");
+  show("condIn", b==="Yes");
+  const act=mval("m_activity");
+  show("condActive", b==="Yes" && isActiveVal(act));
+  show("condNotActive", b==="Yes" && !!act && !isActiveVal(act));
+  const rec=mval("m_recommend");
+  show("condReason", b==="Yes" && isActiveVal(act) && !!rec && rec!=="Current");
+  const tp=mval("m_templePrep");
+  show("condLastAttended", tp==="Enrolled"||tp==="Attending");
+  updateFlagsLive();
+}
+function collectModal(){
+  const rec={};
+  modalBody.querySelectorAll("[data-k]").forEach(function(el){
+    const block=el.closest(".cond");
+    if(block && block.classList.contains("hidden")) return;
+    rec[el.dataset.k]=el.value.trim();
+  });
+  return rec;
+}
+function updateFlagsLive(){
+  const f=computeFlags(collectModal());
+  const panel=$("flagPanel"); if(!panel) return;
+  panel.innerHTML = f.length
+    ? '<div class="flagchips">'+f.map(function(x){return '<span class="badge '+x.c+'">&#9873; '+esc(x.t)+'</span>';}).join("")+'</div>'
+    : '<div class="none">No follow-up flags — this brother is fully accounted for.</div>';
 }
 function openModal(id){
-  const p = id ? data.find(function(x){return x.id===id;}) : {};
-  editingId = id || null;
-  $("modalTitle").textContent = id ? "Edit Brother" : "Add Brother";
-  $("deleteBtn").style.visibility = id ? "visible" : "hidden";
+  const p=id?data.find(function(x){return x.id===id;}):{};
+  editingId=id||null;
+  $("modalTitle").textContent=id?"Edit Brother":"Add Brother";
+  $("deleteBtn").style.visibility=id?"visible":"hidden";
   buildModal(p||{});
   overlay.classList.add("show");
 }
@@ -537,36 +595,33 @@ $("cancelBtn").addEventListener("click", closeModal);
 overlay.addEventListener("click", function(e){ if(e.target===overlay) closeModal(); });
 
 $("saveBtn").addEventListener("click", function(){
-  const rec={};
-  modalBody.querySelectorAll("[data-k]").forEach(function(el){ rec[el.dataset.k]=el.value.trim(); });
+  const rec=collectModal();
   if(!rec.name){ alert("Please enter a name."); return; }
-  rec.updated = new Date().toISOString().slice(0,10);
-  rec.id = editingId || ("b"+Date.now()+Math.floor(Math.random()*1000));
+  // derive records field (keeps dashboard transfer count meaningful)
+  if(rec.boundaries==="No"){ rec.records=(rec.homeTransfer==="Records transferred")?"Out — Notify Clerk":"Transfer Out Needed"; }
+  else if(rec.boundaries==="Yes"){ rec.records="In Ward — OK"; }
+  rec.updated=new Date().toISOString().slice(0,10);
+  rec.id=editingId||("b"+Date.now()+Math.floor(Math.random()*1000));
   $("saveBtn").disabled=true;
   writeBrother(rec).then(closeModal).catch(function(e){ alert("Save failed: "+(e.code||e.message)); })
     .finally(function(){ $("saveBtn").disabled=false; });
 });
 $("deleteBtn").addEventListener("click", function(){
   if(!editingId) return;
-  if(confirm("Remove this brother from the record?")){
-    removeBrother(editingId).then(closeModal).catch(function(e){ alert("Delete failed: "+(e.code||e.message)); });
-  }
+  if(confirm("Remove this brother from the record?")) removeBrother(editingId).then(closeModal).catch(function(e){ alert("Delete failed: "+(e.code||e.message)); });
 });
 
 /* ===================== SETTINGS ===================== */
 $("resetPwBtn").addEventListener("click", function(){
-  const m=$("pwMsg"); const user=auth.currentUser;
+  const m=$("pwMsg"), user=auth.currentUser;
   if(!user||!user.email){ m.className="smsg err"; m.textContent="No account email on file."; return; }
-  sendPasswordResetEmail(auth, user.email)
-    .then(function(){ m.className="smsg ok"; m.textContent="Reset email sent to "+user.email+"."; })
+  sendPasswordResetEmail(auth,user.email).then(function(){ m.className="smsg ok"; m.textContent="Reset email sent to "+user.email+"."; })
     .catch(function(e){ m.className="smsg err"; m.textContent="Could not send reset: "+(e.code||e.message); });
 });
 $("exportBtn").addEventListener("click", function(){
   const blob=new Blob([JSON.stringify({exported:new Date().toISOString(),brethren:data},null,2)],{type:"application/json"});
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(blob);
-  a.download="quorum-ordinance-backup-"+new Date().toISOString().slice(0,10)+".json";
-  a.click(); URL.revokeObjectURL(a.href);
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+  a.download="quorum-ordinance-backup-"+new Date().toISOString().slice(0,10)+".json"; a.click(); URL.revokeObjectURL(a.href);
   const m=$("ioMsg"); m.className="smsg ok"; m.textContent="Backup downloaded.";
 });
 $("importBtn").addEventListener("click", function(){ $("importFile").click(); });
@@ -575,26 +630,17 @@ $("importFile").addEventListener("change", function(e){
   const r=new FileReader();
   r.onload=function(){
     try{
-      const obj=JSON.parse(r.result);
-      const arr=Array.isArray(obj)?obj:obj.brethren;
+      const obj=JSON.parse(r.result); const arr=Array.isArray(obj)?obj:obj.brethren;
       if(!Array.isArray(arr)) throw new Error("bad");
       const m=$("ioMsg"); m.className="smsg"; m.textContent="Importing "+arr.length+"…";
-      const jobs=arr.map(function(p){
-        if(!p.id) p.id="b"+Date.now()+Math.floor(Math.random()*100000);
-        return writeBrother(p);
-      });
-      Promise.all(jobs)
-        .then(function(){ m.className="smsg ok"; m.textContent="Imported "+arr.length+" brethren into the cloud."; })
+      const jobs=arr.map(function(p){ if(!p.id) p.id="b"+Date.now()+Math.floor(Math.random()*100000); return writeBrother(p); });
+      Promise.all(jobs).then(function(){ m.className="smsg ok"; m.textContent="Imported "+arr.length+" brethren into the cloud."; })
         .catch(function(err){ m.className="smsg err"; m.textContent="Some records failed: "+(err.code||err.message); });
-    }catch(err){
-      const m2=$("ioMsg"); m2.className="smsg err"; m2.textContent="Could not read that file.";
-    }
+    }catch(err){ const m2=$("ioMsg"); m2.className="smsg err"; m2.textContent="Could not read that file."; }
   };
-  r.readAsText(file);
-  e.target.value="";
+  r.readAsText(file); e.target.value="";
 });
 
-/* ===================== RENDER ALL ===================== */
 function renderAll(){ renderDash(); renderRoster(); }
 </script>
 </body>
