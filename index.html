@@ -134,6 +134,31 @@
   .privacy{background:#fbf7ee;border:1px solid var(--gold-line);border-radius:12px;padding:14px 16px;font-size:12.5px;color:#6a5a32;max-width:560px;margin-bottom:20px;line-height:1.6}
   .privacy b{color:#5a4a22}
 
+  .rv-printhead{font-size:13px;color:var(--muted);margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+  .rv-printhead b{color:var(--ink);font-family:Georgia,serif;font-size:15px}
+  .rv-toolbar{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+  .rv-toolbar select{padding:9px 12px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--text)}
+  .rv-group{margin-bottom:26px}
+  .rv-group>h3{font-family:Georgia,serif;font-size:16px;color:var(--ink);border-bottom:2px solid var(--gold);padding-bottom:6px;margin-bottom:14px}
+  .rv-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:12px;box-shadow:var(--shadow)}
+  .rv-card.flag{border-left:4px solid var(--danger)}
+  .rv-name{font-weight:700;color:var(--ink);font-size:15px;margin-bottom:4px}
+  .rv-text{font-size:13.5px;color:var(--text);line-height:1.55}
+  .rv-actions{list-style:none;margin-top:9px;padding:0}
+  .rv-actions li{font-size:13px;color:#7a3a3a;margin:3px 0;padding-left:22px;position:relative}
+  .rv-actions li::before{content:"\2610";position:absolute;left:0;top:-1px;font-size:16px;color:#9d3b3b}
+  .rv-empty{color:var(--muted);font-size:14px}
+
+  @media print{
+    #gate,.overlay,.topbar,.no-print{display:none !important}
+    #app{display:block !important}
+    main{padding:0 !important;max-width:none !important}
+    .view{display:none !important}
+    #view-review{display:block !important}
+    body{background:#fff}
+    .rv-card{box-shadow:none;border:1px solid #ccc;break-inside:avoid;page-break-inside:avoid}
+  }
+
   @media(max-width:640px){
     .secgrid{grid-template-columns:1fr}
     .topinner{height:auto;padding:10px 0;flex-wrap:wrap}
@@ -169,6 +194,7 @@
       <nav class="tabs">
         <button data-view="dash" class="active">Dashboard</button>
         <button data-view="roster">Brethren</button>
+        <button data-view="review">Meeting Review</button>
         <button data-view="settings">Settings</button>
       </nav>
       <button class="lockout" id="signoutBtn">Sign Out</button>
@@ -209,6 +235,21 @@
           <tbody id="rosterBody"></tbody>
         </table>
       </div>
+    </section>
+
+    <section class="view" id="view-review">
+      <div class="vhead">
+        <h2 class="serif">Meeting Review</h2>
+        <button class="btn primary no-print" id="printBtn">Print / Save as PDF</button>
+      </div>
+      <div class="rv-toolbar no-print">
+        <select id="reviewFilter">
+          <option value="all">Everyone (follow-up first)</option>
+          <option value="flagged">Only those needing follow-up</option>
+        </select>
+      </div>
+      <div id="reviewHeader" class="rv-printhead"></div>
+      <div id="reviewBody"></div>
     </section>
 
     <section class="view" id="view-settings">
@@ -641,7 +682,79 @@ $("importFile").addEventListener("change", function(e){
   r.readAsText(file); e.target.value="";
 });
 
-function renderAll(){ renderDash(); renderRoster(); }
+/* ===================== MEETING REVIEW ===================== */
+function fmtDate(s){ const d=new Date(s); if(isNaN(d)) return s; return d.toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"}); }
+
+function narrate(p){
+  const name=p.name||"This brother";
+  const s=[];
+  if(p.boundaries==="No"){
+    let t=name+" lives outside the ward boundaries";
+    if(p.newAddress) t+=" (address on file: "+p.newAddress+")";
+    t+=". The priority is to locate his current home address and have the ward clerk transfer his records";
+    if(p.homeTransfer) t+=" — records status: "+p.homeTransfer.toLowerCase();
+    t+=".";
+    s.push(t);
+  }else if(p.boundaries==="Yes"){
+    if(isActiveVal(p.activity)){
+      s.push(name+" is within the ward boundaries and "+(p.activity==="Semi-Active"?"semi-active":"active")+".");
+      if(p.calling) s.push("He serves as "+p.calling+".");
+      if(p.recommend==="Current"){
+        s.push("His temple recommend is current"+(p.expires?", valid through "+fmtDate(p.expires):"")+".");
+      }else if(p.recommend && p.recommend!=="N/A"){
+        s.push("His temple recommend is "+p.recommend.toLowerCase()+(p.recommendInactiveReason?" — reason: "+p.recommendInactiveReason:"")+", and needs attention.");
+      }
+    }else if(p.activity){
+      const word=p.activity==="New Move-In"?"a recent move-in":p.activity.toLowerCase();
+      s.push(name+" is within the ward boundaries and currently "+word+".");
+      if(p.nextOrdinance && p.nextOrdinance!=="None") s.push("The next ordinance to work toward is "+p.nextOrdinance.toLowerCase()+".");
+    }else{
+      s.push(name+" is within the ward boundaries.");
+    }
+  }else{
+    s.push(name+" — boundary status not yet recorded.");
+  }
+  if(p.office) s.push("He holds the office of "+p.office+".");
+  if(p.nextOffice && p.nextOffice!=="None") s.push("Advancement goal: "+p.nextOffice+(p.nextSteps?" — "+p.nextSteps:"")+".");
+  if(p.templePrep && p.templePrep!=="Not Enrolled"){
+    let tp="Temple prep class: "+p.templePrep.toLowerCase();
+    if(p.templeLastAttended) tp+=" (last attended "+fmtDate(p.templeLastAttended)+")";
+    s.push(tp+".");
+  }
+  if(p.notes) s.push("Notes: "+p.notes);
+  return s.join(" ");
+}
+
+function reviewCard(p){
+  const fl=computeFlags(p);
+  const actions = fl.length ? '<ul class="rv-actions">'+fl.map(function(x){return '<li>'+esc(x.t)+'</li>';}).join("")+'</ul>' : "";
+  return '<div class="rv-card'+(fl.length?' flag':'')+'">'+
+    '<div class="rv-name">'+esc(p.name||"—")+(p.phone?' &nbsp;<span style="font-weight:400;color:#6d7180">'+esc(p.phone)+'</span>':'')+'</div>'+
+    '<div class="rv-text">'+esc(narrate(p))+'</div>'+actions+'</div>';
+}
+function renderReview(){
+  const mode=($("reviewFilter")||{}).value||"all";
+  const flagged=data.filter(function(p){ return computeFlags(p).length>0; });
+  const onTrack=data.filter(function(p){ return computeFlags(p).length===0; });
+  $("reviewHeader").innerHTML='<b>Elders Quorum — Presidency Review</b><br>Generated '+fmtDate(new Date().toISOString())+
+    ' · '+data.length+' brethren on record · '+flagged.length+' needing follow-up.';
+  let html="";
+  if(flagged.length){
+    html+='<div class="rv-group"><h3>Needs Follow-Up ('+flagged.length+')</h3>'+flagged.map(reviewCard).join("")+'</div>';
+  }else{
+    html+='<div class="rv-group"><h3>Needs Follow-Up (0)</h3><div class="rv-empty">No outstanding follow-ups. Everyone is accounted for.</div></div>';
+  }
+  if(mode==="all"){
+    html+='<div class="rv-group"><h3>On Track ('+onTrack.length+')</h3>'+
+      (onTrack.length?onTrack.map(reviewCard).join(""):'<div class="rv-empty">None.</div>')+'</div>';
+  }
+  if(!data.length) html='<div class="rv-empty">No brethren entered yet.</div>';
+  $("reviewBody").innerHTML=html;
+}
+const _rf=$("reviewFilter"); if(_rf) _rf.addEventListener("change", renderReview);
+const _pb=$("printBtn"); if(_pb) _pb.addEventListener("click", function(){ window.print(); });
+
+function renderAll(){ renderDash(); renderRoster(); renderReview(); }
 </script>
 </body>
 </html>
