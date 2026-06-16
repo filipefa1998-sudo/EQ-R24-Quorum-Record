@@ -162,13 +162,16 @@
   .rv-actions li{font-size:13px;color:#7a3a3a;margin:3px 0;padding-left:22px;position:relative}
   .rv-actions li::before{content:"\2610";position:absolute;left:0;top:-1px;font-size:16px;color:#9d3b3b}
   .rv-empty{color:var(--muted);font-size:14px}
+  .rv-act{font-size:12.5px;color:var(--info);margin-top:8px}
+  .rv-act b{color:var(--ink)}
+  .rv-comp{font-size:12.5px;color:#7a5e1d;margin-top:3px}
 
   @media print{
     #gate,.overlay,.topbar,.no-print{display:none !important}
     #app{display:block !important}
     main{padding:0 !important;max-width:none !important}
-    .view{display:none !important}
-    #view-review{display:block !important}
+    .view:not(.active){display:none !important}
+    .view.active{display:block !important}
     body{background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
     .rv-card,.chartwrap,.rv-stat{box-shadow:none;border:1px solid #ccc;break-inside:avoid;page-break-inside:avoid}
     .charts{grid-template-columns:1fr 1fr}
@@ -208,6 +211,7 @@
         <button data-view="dash" class="active">Dashboard</button>
         <button data-view="roster">Brethren</button>
         <button data-view="review">Meeting Review</button>
+        <button data-view="opps">Opportunities</button>
         <button data-view="settings">Settings</button>
       </nav>
       <button class="lockout" id="signoutBtn">Sign Out</button>
@@ -233,6 +237,7 @@
           <option value="advance">Need priesthood advancement</option>
           <option value="temple">Need temple ordinance</option>
           <option value="outbound">Records moved out of ward</option>
+          <option value="mission">Currently serving full-time mission</option>
           <option value="inbound">In ward boundaries</option>
           <option value="transfer">Records transfer pending</option>
           <option value="expired">Active w/ expired recommend</option>
@@ -272,6 +277,13 @@
       </div>
       <div id="reviewHeader" class="rv-printhead"></div>
       <div id="reviewBody"></div>
+    </section>
+
+    <section class="view" id="view-opps">
+      <div class="vhead"><h2 class="serif">Plan of Action</h2><button class="btn primary no-print" id="printOppsBtn">Print / Save as PDF</button></div>
+      <div class="hintline no-print">Auto-built from your records. Tap any name to edit. Print for a council or companionship-planning copy.</div>
+      <div id="oppsHeader" class="rv-printhead"></div>
+      <div id="oppsBody"></div>
     </section>
 
     <section class="view" id="view-settings">
@@ -341,7 +353,8 @@ const OPTS = {
   recommend:["Current","Expired","Never Held","N/A"],
   recommendType:["Full","Limited-Use","None"],
   templePrep:["Not Enrolled","Enrolled","Attending","Attended — Not Complete","Completed"],
-  nextOrdinance:["None","Priesthood Advancement","Temple Recommend — Baptisms for the Dead","Patriarchal Blessing","Endowment","Sealing — Spouse","Sealing — Family","Other"]
+  nextOrdinance:["None","Melchizedek Priesthood","Patriarchal Blessing","Temple Recommend — Baptisms for the Dead","Endowment","Sealing — Spouse","Sealing — Family","Other"],
+  mission:["Not serving","Currently serving","Recently returned"]
 };
 
 let data=[], editingId=null, unsub=null;
@@ -458,7 +471,8 @@ function renderDash(){
     ["Brethren Tracked",data.length,"","all"],
     ["In Ward Boundaries",cnt(function(p){return p.boundaries==="Yes";}),"","inbound"],
     ["Records Moved Out of Ward",cnt(movedOut),"alert","outbound"],
-    ["Records: Transfer Pending",cnt(function(p){return p.boundaries==="No"&&p.homeTransfer!=="Records transferred";}),"alert","transfer"]
+    ["Records: Transfer Pending",cnt(function(p){return p.boundaries==="No"&&p.homeTransfer!=="Records transferred";}),"alert","transfer"],
+    ["Currently Serving Missions",cnt(function(p){return p.mission==="Currently serving";}),"info","mission"]
   ];
   const priest=[
     ["Elders",cnt(function(p){return p.office==="Elder";}),"","elder"],
@@ -492,7 +506,7 @@ function badge(val,map){ return '<span class="badge '+(map[val]||"b-grey")+'">'+
 const recMap={"Current":"b-ok","Expired":"b-danger","Never Held":"b-grey","N/A":"b-grey"};
 const actMap={"Active":"b-ok","Semi-Active":"b-warn","Less-Active":"b-warn","Inactive":"b-grey","New Move-In":"b-info"};
 const prepMap={"Completed":"b-ok","Attending":"b-info","Enrolled":"b-info","Attended — Not Complete":"b-warn","Not Enrolled":"b-grey"};
-const ordMap={"Endowment":"b-gold","Sealing — Spouse":"b-gold","Sealing — Family":"b-gold","Patriarchal Blessing":"b-gold","Temple Recommend — Baptisms for the Dead":"b-info","Priesthood Advancement":"b-info","Other":"b-info","None":"b-grey"};
+const ordMap={"Endowment":"b-gold","Sealing — Spouse":"b-gold","Sealing — Family":"b-gold","Patriarchal Blessing":"b-gold","Temple Recommend — Baptisms for the Dead":"b-info","Melchizedek Priesthood":"b-info","Priesthood Advancement":"b-info","Other":"b-info","None":"b-grey"};
 const offMap={"Elder":"b-ok","High Priest":"b-ok","Prospective Elder":"b-info"};
 
 function passesFilter(p,f){
@@ -501,6 +515,7 @@ function passesFilter(p,f){
     case "advance": return needAdvance(p);
     case "temple": return needTemple(p);
     case "outbound": return p.boundaries==="No";
+    case "mission": return p.mission==="Currently serving";
     case "inbound": return p.boundaries==="Yes";
     case "transfer": return p.boundaries==="No"&&p.homeTransfer!=="Records transferred";
     case "expired": return isActiveVal(p.activity)&&p.recommend==="Expired";
@@ -541,24 +556,27 @@ $("filter").addEventListener("change", renderRoster);
 function fmtDate(s){ const d=new Date(s); if(isNaN(d)) return s; return d.toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"}); }
 function narrate(p){
   const name=p.name||"This brother"; const s=[];
+  if(p.mission==="Currently serving") s.push(name+" is currently serving a full-time mission.");
+  else if(p.mission==="Recently returned") s.push(name+" recently returned from a full-time mission.");
+  const subj=s.length?"He":name;
   if(p.boundaries==="No"){
-    let t=name+" lives outside the ward boundaries";
+    let t=subj+" lives outside the ward boundaries";
     if(p.newAddress) t+=" (address on file: "+p.newAddress+")";
     t+=". The priority is to locate his current home address and have the ward clerk transfer his records";
     if(p.homeTransfer) t+=" — records status: "+p.homeTransfer.toLowerCase();
     s.push(t+".");
   }else if(p.boundaries==="Yes"){
     if(isActiveVal(p.activity)){
-      s.push(name+" is within the ward boundaries and "+(p.activity==="Semi-Active"?"semi-active":"active")+".");
+      s.push(subj+" is within the ward boundaries and "+(p.activity==="Semi-Active"?"semi-active":"active")+".");
       if(p.calling) s.push("He serves as "+p.calling+".");
       if(p.recommend==="Current") s.push("His temple recommend is current"+(p.expires?", valid through "+fmtDate(p.expires):"")+".");
       else if(p.recommend && p.recommend!=="N/A") s.push("His temple recommend is "+p.recommend.toLowerCase()+(p.recommendInactiveReason?" — reason: "+p.recommendInactiveReason:"")+", and needs attention.");
     }else if(p.activity){
       const word=p.activity==="New Move-In"?"a recent move-in":p.activity.toLowerCase();
-      s.push(name+" is within the ward boundaries and currently "+word+".");
-      if(p.nextOrdinance && p.nextOrdinance!=="None") s.push("The next ordinance to work toward is "+p.nextOrdinance.toLowerCase()+".");
-    }else s.push(name+" is within the ward boundaries.");
-  }else s.push(name+" — boundary status not yet recorded.");
+      s.push(subj+" is within the ward boundaries and currently "+word+".");
+    }else s.push(subj+" is within the ward boundaries.");
+    if(p.nextOrdinance && p.nextOrdinance!=="None") s.push("The next ordinance to work toward is "+p.nextOrdinance.toLowerCase()+".");
+  }else s.push(subj+" — boundary status not yet recorded.");
   if(p.office) s.push("He holds the office of "+p.office+".");
   if(needAdvance(p)) s.push("Advancement goal: "+p.nextOffice+(p.nextSteps?" — "+p.nextSteps:"")+".");
   if(p.templePrep && p.templePrep!=="Not Enrolled"){ let tp="Temple prep class: "+p.templePrep.toLowerCase(); if(p.templeLastAttended) tp+=" (last attended "+fmtDate(p.templeLastAttended)+")"; s.push(tp+"."); }
@@ -655,7 +673,7 @@ function area(key,v){ return '<textarea id="m_'+key+'" data-k="'+key+'">'+esc(v|
 function fld(label,inner,full){ return '<div class="fld'+(full?' full':'')+'"><label>'+label+'</label>'+inner+'</div>'; }
 function buildModal(p){
   modalBody.innerHTML=
-    '<div class="wzsec"><div class="secgrid">'+fld("Full Name",txt("name",p.name))+fld("Phone",txt("phone",p.phone))+'</div></div>'+
+    '<div class="wzsec"><div class="secgrid">'+fld("Full Name",txt("name",p.name))+fld("Phone",txt("phone",p.phone))+fld("Full-Time Mission",sel("mission",OPTS.mission,p.mission),true)+'</div></div>'+
     '<div class="wzsec"><h4>1 · Boundaries</h4><div class="hint">Are they within the ward boundaries?</div><div class="secgrid">'+
       fld("In Ward Boundaries", sel("boundaries",OPTS.boundaries,p.boundaries))+
       '<div class="cond hidden" id="condOut"><div class="secgrid">'+
@@ -666,7 +684,9 @@ function buildModal(p){
       '<div class="cond hidden" id="condIn"><div class="secgrid">'+
         fld("Active?", sel("activity",OPTS.activity,p.activity))+
         '<div class="cond hidden" id="condActive"><div class="secgrid">'+fld("Current Calling", txt("calling",p.calling))+'<div class="stepnote">Active → confirm temple recommend (section 3) and record their calling.</div></div></div>'+
-        '<div class="cond hidden" id="condNotActive"><div class="secgrid">'+'<div class="stepnote">Not active → guide toward the next ordinance: priesthood advancement → limited recommend (baptisms for the dead) → patriarchal blessing → endowment.</div>'+fld("Next Ordinance (reactivation path)", sel("nextOrdinance",OPTS.nextOrdinance,p.nextOrdinance), true)+'</div></div>'+
+        '<div class="cond hidden" id="condNotActive"><div class="secgrid">'+'<div class="stepnote">Not active → guide toward the next ordinance below (Melchizedek Priesthood → limited recommend for baptisms for the dead → patriarchal blessing → endowment).</div></div></div>'+
+        fld("Next Ordinance Needed", sel("nextOrdinance",OPTS.nextOrdinance,p.nextOrdinance), true)+
+        '<div class="stepnote">Choose the next saving ordinance to work toward — applies whether he is active or less-active.</div>'+
       '</div></div>'+
     '</div></div>'+
     '<div class="wzsec"><h4>2 · Next Office (Priesthood Advancement)</h4><div class="hint">Current office and the path to the next one.</div><div class="secgrid">'+
@@ -757,7 +777,65 @@ $("importFile").addEventListener("change", function(e){
   r.readAsText(file); e.target.value="";
 });
 
-function renderAll(){ renderDash(); renderRoster(); renderReview(); }
+/* ===================== OPPORTUNITIES (PLAN OF ACTION) ===================== */
+function planCard(p,detail,action,companion){
+  return '<div class="rv-card" data-id="'+esc(p.id)+'">'+
+    '<div class="rv-name">'+esc(p.name||"—")+'</div>'+
+    (detail?'<div class="rv-text">'+esc(detail)+'</div>':'')+
+    '<div class="rv-act"><b>Next action:</b> '+esc(action)+'</div>'+
+    (companion?'<div class="rv-comp">Suggested companion: '+esc(companion)+'</div>':'')+
+  '</div>';
+}
+function oppsGroup(title,cards){
+  if(!cards.length) return '<div class="rv-group"><h3>'+title+' (0)</h3><div class="rv-empty">None right now.</div></div>';
+  return '<div class="rv-group"><h3>'+title+' ('+cards.length+')</h3>'+cards.join("")+'</div>';
+}
+function renderOpps(){
+  if(!data.length){ $("oppsHeader").innerHTML=""; $("oppsBody").innerHTML='<div class="rv-empty">No brethren entered yet.</div>'; return; }
+  const mentors=data.filter(function(p){ return (p.office==="Elder"||p.office==="High Priest") && p.recommend==="Current" && isActiveVal(p.activity) && p.mission!=="Currently serving"; });
+  let mi=0;
+  function nextMentor(excludeId){
+    if(!mentors.length) return "an active, temple-worthy brother";
+    let m=mentors[mi%mentors.length]; mi++;
+    if(m.id===excludeId && mentors.length>1){ m=mentors[mi%mentors.length]; mi++; }
+    return m.name;
+  }
+  // Temple
+  const baptisms=data.filter(function(p){ return p.nextOrdinance==="Temple Recommend — Baptisms for the Dead" || (p.recommendType==="Limited-Use"&&p.recommend==="Current"); })
+    .map(function(p){ return planCard(p,"Recommend: "+(p.recommend||"—")+" ("+(p.recommendType||"type n/a")+").","Invite to the next ward temple-baptism trip; make sure he has a current limited-use recommend."); });
+  const endow=data.filter(function(p){ return p.nextOrdinance==="Endowment" || ["Enrolled","Attending","Attended — Not Complete"].indexOf(p.templePrep)>=0; })
+    .map(function(p){ return planCard(p,"Temple prep: "+(p.templePrep||"not enrolled")+". Recommend: "+(p.recommend||"—")+".","Temple prep class, then recommend interviews (bishop → stake president) toward the endowment.", isActiveVal(p.activity)?"":nextMentor(p.id)); });
+  const renew=data.filter(function(p){ return isActiveVal(p.activity)&&p.recommend==="Expired"; })
+    .map(function(p){ return planCard(p,"Active with an expired recommend"+(p.recommendInactiveReason?" — "+p.recommendInactiveReason:"")+".","Schedule recommend interviews to renew (bishopric, then stake presidency)."); });
+  const seal=data.filter(function(p){ return p.nextOrdinance==="Sealing — Spouse"||p.nextOrdinance==="Sealing — Family"; })
+    .map(function(p){ return planCard(p,"Next ordinance: "+p.nextOrdinance+".","Coordinate with the bishop on sealing clearance and temple scheduling."); });
+  // Missionary
+  const serving=data.filter(function(p){ return p.mission==="Currently serving"; })
+    .map(function(p){ return planCard(p,"Currently serving a full-time mission.","Keep regular contact, support the family at home, and preserve his membership-record continuity."); });
+  const returned=data.filter(function(p){ return p.mission==="Recently returned"; })
+    .map(function(p){ return planCard(p,"Recently returned missionary.","Help him transition — a meaningful calling, institute, temple attendance, and school or work goals."); });
+  const reactivate=data.filter(function(p){ return p.boundaries==="Yes" && !!p.activity && !isActiveVal(p.activity) && p.mission!=="Currently serving"; })
+    .map(function(p){ const goal=(p.nextOrdinance&&p.nextOrdinance!=="None")?("toward "+p.nextOrdinance.toLowerCase()):"toward full activity and the temple"; return planCard(p,"Currently "+(p.activity||"").toLowerCase()+(p.nextOrdinance&&p.nextOrdinance!=="None"?". Next ordinance: "+p.nextOrdinance:"")+".","Assign a ministering companionship to fellowship and walk with him "+goal+".", nextMentor(p.id)); });
+
+  const tCount=baptisms.length+endow.length+renew.length+seal.length;
+  const mCount=serving.length+returned.length+reactivate.length;
+  $("oppsHeader").innerHTML='<b>Elders Quorum — Plan of Action</b><br>Generated '+fmtDate(new Date().toISOString())+' · '+tCount+' temple opportunities · '+mCount+' missionary items.';
+
+  let html='<div class="sectlabel">Temple Opportunities</div>';
+  html+=oppsGroup("Temple Baptisms — Limited Recommend", baptisms);
+  html+=oppsGroup("Endowment Path", endow);
+  html+=oppsGroup("Recommend Renewal", renew);
+  html+=oppsGroup("Sealing", seal);
+  html+='<div class="sectlabel">Missionary Opportunities</div>';
+  html+=oppsGroup("Currently Serving Full-Time Missionaries", serving);
+  html+=oppsGroup("Recently Returned", returned);
+  html+=oppsGroup("Reactivation &amp; Fellowship Pairings", reactivate);
+  $("oppsBody").innerHTML=html;
+}
+$("printOppsBtn").addEventListener("click", function(){ window.print(); });
+$("view-opps").addEventListener("click", function(e){ const card=e.target.closest(".rv-card[data-id]"); if(card) openModal(card.dataset.id); });
+
+function renderAll(){ renderDash(); renderRoster(); renderReview(); renderOpps(); }
 </script>
 </body>
 </html>
