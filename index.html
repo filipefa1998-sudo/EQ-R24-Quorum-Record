@@ -382,6 +382,7 @@ const OPTS = {
   nextOrdinance:["None","Melchizedek Priesthood","Patriarchal Blessing","Temple Recommend — Baptisms for the Dead","Endowment","Sealing — Spouse","Sealing — Family","Other"],
   mission:["Not serving","Currently serving","Recently returned"],
   wardMission:["None","Ward Mission Leader","Ward Missionary"],
+  calling:["No Calling","Elders Quorum President","Elders Quorum 1st Counselor","Elders Quorum 2nd Counselor","Elders Quorum Secretary","Elders Quorum Assistant Secretary","Elders Quorum Ministering Secretary","Elders Quorum Activities Coordinator","Elders Quorum Assistant Activities Coordinator","Elders Quorum Activity Committee Member","Elders Quorum Service Coordinator","Elders Quorum Assistant Service Coordinator","Elders Quorum Service Committee Member","Sunday School Teacher","Primary Teacher","Music Coordinator","Bishop","1st Counselor Bishopric","2nd Counselor Bishopric","Ward Executive Secretary","Ward Assistant Executive Secretary","Ward Clerk","Ward Assistant Clerk — Membership","Ward Assistant Clerk — Finance"],
   focus5:["No","Yes"],
   planStatus:["Not started","In progress","Completed"]
 };
@@ -504,6 +505,15 @@ function computeFlags(p){
   }
   return f;
 }
+function recordsStage(p){
+  if(p.boundaries==="No"){
+    const h=p.homeTransfer||"Not started";
+    const map={"Records transferred":"b-ok","Records transfer requested":"b-info","Address located":"b-warn","Not started":"b-danger"};
+    return {t:h, c:map[h]||"b-warn"};
+  }
+  if(p.boundaries==="Yes") return {t:"In ward", c:"b-ok"};
+  return {t:"—", c:"b-grey"};
+}
 
 /* ===================== DASHBOARD ===================== */
 function cnt(fn){ return data.filter(fn).length; }
@@ -583,7 +593,7 @@ function renderRoster(){
   body.innerHTML=rows.map(function(p){
     const rf=renewalFlag(p), fl=computeFlags(p);
     const bnd=p.boundaries==="No"?'<span class="badge b-warn">No</span>':(p.boundaries==="Yes"?'<span class="badge b-ok">Yes</span>':'<span class="badge b-grey">—</span>');
-    const rec=/Transfer/.test(p.records||"")?'<span class="badge b-warn">'+esc(p.records)+'</span>':'<span class="badge b-grey">'+esc(p.records||"—")+'</span>';
+    const rs=recordsStage(p); const rec='<span class="badge '+rs.c+'">'+esc(rs.t)+'</span>';
     const action=fl.length?'<span class="badge b-danger" title="'+esc(fl.map(function(x){return x.t;}).join(" • "))+'">&#9873; '+fl.length+'</span>':'<span class="badge b-grey">—</span>';
     return '<tr data-id="'+esc(p.id)+'"><td class="nm">'+esc(p.name||"—")+'</td>'+
       '<td>'+bnd+'</td><td>'+rec+'</td><td>'+badge(p.activity,actMap)+'</td>'+
@@ -614,7 +624,6 @@ function narrate(p){
   }else if(p.boundaries==="Yes"){
     if(isActiveVal(p.activity)){
       s.push(subj+" is within the ward boundaries and "+(p.activity==="Semi-Active"?"semi-active":"active")+".");
-      if(p.calling) s.push("He serves as "+p.calling+".");
       if(p.recommend==="Current") s.push("His temple recommend is current"+(p.expires?", valid through "+fmtDate(p.expires):"")+".");
       else if(p.recommend && p.recommend!=="N/A") s.push("His temple recommend is "+p.recommend.toLowerCase()+(p.recommendInactiveReason?" — reason: "+p.recommendInactiveReason:"")+", and needs attention.");
     }else if(p.activity){
@@ -624,6 +633,7 @@ function narrate(p){
     if(p.nextOrdinance && p.nextOrdinance!=="None") s.push("The next ordinance to work toward is "+p.nextOrdinance.toLowerCase()+".");
   }else s.push(subj+" — boundary status not yet recorded.");
   if(p.office) s.push("He holds the office of "+p.office+".");
+  if(p.calling && p.calling!=="No Calling") s.push("He serves as "+p.calling+".");
   if(p.wardMission && p.wardMission!=="None") s.push("Ward mission calling: "+p.wardMission+".");
   if(needAdvance(p)) s.push("Advancement goal: "+p.nextOffice+(p.nextSteps?" — "+p.nextSteps:"")+".");
   if(p.templePrep && p.templePrep!=="Not Enrolled"){ let tp="Temple prep class: "+p.templePrep.toLowerCase(); if(p.templeLastAttended) tp+=" (last attended "+fmtDate(p.templeLastAttended)+")"; s.push(tp+"."); }
@@ -731,7 +741,7 @@ $("view-review").addEventListener("click", function(e){ const card=e.target.clos
 
 /* ===================== GUIDED MODAL ===================== */
 const overlay=$("overlay"), modalBody=$("modalBody");
-function optTags(list,v){ return '<option value=""></option>'+list.map(function(o){return '<option'+(o===v?' selected':'')+'>'+o+'</option>';}).join(""); }
+function optTags(list,v){ const extra=(v && list.indexOf(v)<0)?'<option selected>'+esc(v)+'</option>':''; return '<option value=""></option>'+extra+list.map(function(o){return '<option'+(o===v?' selected':'')+'>'+o+'</option>';}).join(""); }
 function sel(key,list,v){ return '<select id="m_'+key+'" data-k="'+key+'">'+optTags(list,v||"")+'</select>'; }
 function txt(key,v){ return '<input type="text" id="m_'+key+'" data-k="'+key+'" value="'+esc(v||"")+'">'; }
 function dat(key,v){ return '<input type="date" id="m_'+key+'" data-k="'+key+'" value="'+esc(v||"")+'">'; }
@@ -739,7 +749,7 @@ function area(key,v){ return '<textarea id="m_'+key+'" data-k="'+key+'">'+esc(v|
 function fld(label,inner,full){ return '<div class="fld'+(full?' full':'')+'"><label>'+label+'</label>'+inner+'</div>'; }
 function buildModal(p){
   modalBody.innerHTML=
-    '<div class="wzsec"><div class="secgrid">'+fld("Full Name",txt("name",p.name))+fld("Phone",txt("phone",p.phone))+fld("Full-Time Mission",sel("mission",OPTS.mission,p.mission))+fld("Ward Mission Calling",sel("wardMission",OPTS.wardMission,p.wardMission))+fld("On the Focus 5 List?",sel("focus5",OPTS.focus5,p.focus5),true)+'</div></div>'+
+    '<div class="wzsec"><div class="secgrid">'+fld("Full Name",txt("name",p.name))+fld("Phone",txt("phone",p.phone))+fld("Calling",sel("calling",OPTS.calling,p.calling))+fld("Full-Time Mission",sel("mission",OPTS.mission,p.mission))+fld("Ward Mission Calling",sel("wardMission",OPTS.wardMission,p.wardMission))+fld("On the Focus 5 List?",sel("focus5",OPTS.focus5,p.focus5),true)+'</div></div>'+
     '<div class="wzsec"><h4>1 · Boundaries</h4><div class="hint">Are they within the ward boundaries?</div><div class="secgrid">'+
       fld("In Ward Boundaries", sel("boundaries",OPTS.boundaries,p.boundaries))+
       '<div class="cond hidden" id="condOut"><div class="secgrid">'+
@@ -749,7 +759,7 @@ function buildModal(p){
       '</div></div>'+
       '<div class="cond hidden" id="condIn"><div class="secgrid">'+
         fld("Active?", sel("activity",OPTS.activity,p.activity))+
-        '<div class="cond hidden" id="condActive"><div class="secgrid">'+fld("Current Calling", txt("calling",p.calling))+'<div class="stepnote">Active → confirm temple recommend (section 3) and record their calling.</div></div></div>'+
+        '<div class="cond hidden" id="condActive"><div class="secgrid">'+'<div class="stepnote">Active → confirm his temple recommend in section 3.</div></div></div>'+
         '<div class="cond hidden" id="condNotActive"><div class="secgrid">'+'<div class="stepnote">Not active → guide toward the next ordinance below (Melchizedek Priesthood → limited recommend for baptisms for the dead → patriarchal blessing → endowment).</div></div></div>'+
         fld("Next Ordinance Needed", sel("nextOrdinance",OPTS.nextOrdinance,p.nextOrdinance), true)+
         '<div class="stepnote">Choose the next saving ordinance to work toward — applies whether he is active or less-active.</div>'+
