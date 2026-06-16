@@ -165,6 +165,10 @@
   .rv-act{font-size:12.5px;color:var(--info);margin-top:8px}
   .rv-act b{color:var(--ink)}
   .rv-comp{font-size:12.5px;color:#7a5e1d;margin-top:3px}
+  .extlink{display:inline-block;margin-top:12px;font-size:13px;font-weight:600;color:#7a5e1d;text-decoration:none;border:1px solid var(--gold-line);border-radius:9px;padding:7px 13px;background:#fbf7ee}
+  .extlink:hover{background:var(--gold-soft)}
+  .logdel{float:right;background:#f6e1e1;color:#9d3b3b;border-radius:7px;width:26px;height:26px;font-size:16px;line-height:1;margin-left:8px}
+  .panel .row select,.panel .row input[type=date]{padding:9px 12px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--text)}
 
   @media print{
     #gate,.overlay,.topbar,.no-print{display:none !important}
@@ -212,6 +216,7 @@
         <button data-view="roster">Brethren</button>
         <button data-view="review">Meeting Review</button>
         <button data-view="opps">Opportunities</button>
+        <button data-view="history">History</button>
         <button data-view="settings">Settings</button>
       </nav>
       <button class="lockout" id="signoutBtn">Sign Out</button>
@@ -225,6 +230,7 @@
       <div class="sectlabel">Priesthood Progression</div><div class="grid" id="cardsPriest"></div>
       <div class="sectlabel">Temple &amp; Ordinances</div><div class="grid" id="cardsTemple"></div>
       <div class="sectlabel">Flags &amp; Follow-Up</div><div class="grid" id="cardsFlags"></div>
+      <a class="extlink" href="https://filipefa1998-sudo.github.io/focus5-tracker/" target="_blank" rel="noopener">Open the Focus 5 Tracker ↗</a>
     </section>
 
     <section class="view" id="view-roster">
@@ -287,6 +293,23 @@
       <div id="oppsBody"></div>
     </section>
 
+    <section class="view" id="view-history">
+      <div class="vhead"><h2 class="serif">History &amp; Trends</h2><button class="btn primary no-print" id="printHistBtn">Print / Save as PDF</button></div>
+      <div class="panel no-print" style="max-width:none">
+        <h3>Log a Completed Ordinance</h3>
+        <p>Each entry is stamped with its date, so quarter-over-quarter trends build over time. Marking a Quarter Plan goal “Completed” also records here automatically.</p>
+        <div class="row">
+          <select id="logBrother"></select>
+          <select id="logMilestone"></select>
+          <input type="date" id="logDate">
+          <button class="btn gold" id="addLogBtn">Add to history</button>
+        </div>
+        <div class="smsg" id="logMsg"></div>
+      </div>
+      <div id="historyHeader" class="rv-printhead"></div>
+      <div id="historyBody"></div>
+    </section>
+
     <section class="view" id="view-settings">
       <div class="vhead"><h2 class="serif">Settings</h2></div>
       <div class="privacy"><b>Where your data lives:</b> Brethren records are stored in your private Firebase project and synced live across the presidency. Access requires a signed-in, authorized account, enforced by Firestore security rules. The session signs out automatically after 30 minutes of inactivity.</div>
@@ -342,8 +365,10 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const COL = "brethren";
+const LEDGER = "ledger";
 const STALE_DAYS = 21;
 const TEMPLE_ORDS = ["Endowment","Sealing — Spouse","Sealing — Family","Temple Recommend — Baptisms for the Dead"];
+const MILESTONES = ["Baptism / Confirmation","Aaronic Priesthood","Melchizedek Priesthood","Patriarchal Blessing","Limited-Use Recommend (Baptisms)","Temple Recommend (Full)","Endowment","Sealing — Spouse","Sealing — Family","Temple Baptisms Trip","Other"];
 
 const OPTS = {
   boundaries:["Yes","No"],
@@ -362,6 +387,7 @@ const OPTS = {
 };
 
 let data=[], editingId=null, unsub=null;
+let ledger=[], unsubL=null;
 const $=function(id){ return document.getElementById(id); };
 function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
 function isActiveVal(a){ return a==="Active"||a==="Semi-Active"; }
@@ -387,7 +413,7 @@ onAuthStateChanged(auth, function(user){
     gate.style.display="none"; appEl.style.display="flex";
     $("meEmail").textContent=user.email||"(unknown)"; armIdle(); startSync();
   }else{
-    clearIdle(); if(unsub){ unsub(); unsub=null; }
+    clearIdle(); if(unsub){ unsub(); unsub=null; } if(unsubL){ unsubL(); unsubL=null; }
     appEl.style.display="none"; gate.style.display="flex";
     gateLoading.style.display="none"; gateLogin.style.display="block";
     let idledOut=false; try{ idledOut=sessionStorage.getItem("qor_idle")==="1"; sessionStorage.removeItem("qor_idle"); }catch(e){}
@@ -422,17 +448,26 @@ $("signoutBtn").addEventListener("click", function(){ signOut(auth); });
 
 /* ===================== FIRESTORE ===================== */
 function startSync(){
-  if(unsub) return;
-  unsub=onSnapshot(collection(db,COL), function(snap){
-    data=[]; snap.forEach(function(d){ const o=d.data(); o.id=d.id; data.push(o); });
-    data.sort(function(a,b){ return (a.name||"").localeCompare(b.name||""); });
-    renderAll();
-  }, function(err){
-    $("rosterBody").innerHTML='<tr><td colspan="11" class="empty">Could not load records: '+esc(err.code||err.message)+'. Check Firestore rules / authorization.</td></tr>';
-  });
+  if(!unsub){
+    unsub=onSnapshot(collection(db,COL), function(snap){
+      data=[]; snap.forEach(function(d){ const o=d.data(); o.id=d.id; data.push(o); });
+      data.sort(function(a,b){ return (a.name||"").localeCompare(b.name||""); });
+      renderAll();
+    }, function(err){
+      $("rosterBody").innerHTML='<tr><td colspan="11" class="empty">Could not load records: '+esc(err.code||err.message)+'. Check Firestore rules / authorization.</td></tr>';
+    });
+  }
+  if(!unsubL){
+    unsubL=onSnapshot(collection(db,LEDGER), function(snap){
+      ledger=[]; snap.forEach(function(d){ const o=d.data(); o.id=d.id; ledger.push(o); });
+      renderHistory();
+    }, function(err){ /* ledger empty or rules not yet published */ });
+  }
 }
 function writeBrother(rec){ return setDoc(doc(db,COL,rec.id),rec,{merge:true}); }
 function removeBrother(id){ return deleteDoc(doc(db,COL,id)); }
+function writeLedger(e){ e.id=e.id||("l"+Date.now()+Math.floor(Math.random()*1000)); return setDoc(doc(db,LEDGER,e.id),e,{merge:true}); }
+function removeLedger(id){ return deleteDoc(doc(db,LEDGER,id)); }
 
 /* ===================== NAV ===================== */
 function gotoView(v){
@@ -783,7 +818,13 @@ $("saveBtn").addEventListener("click", function(){
   rec.updated=new Date().toISOString().slice(0,10);
   rec.id=editingId||("b"+Date.now()+Math.floor(Math.random()*1000));
   $("saveBtn").disabled=true;
-  writeBrother(rec).then(closeModal).catch(function(e){ alert("Save failed: "+(e.code||e.message)); }).finally(function(){ $("saveBtn").disabled=false; });
+  writeBrother(rec).then(function(){
+    if(rec.planStatus==="Completed" && rec.planDone && rec.planGoal){
+      const dup=ledger.some(function(e){ return e.brotherId===rec.id && e.date===rec.planDone && (e.milestone||"")===rec.planGoal; });
+      if(!dup) writeLedger({brotherId:rec.id,name:rec.name,milestone:rec.planGoal,date:rec.planDone,by:(auth.currentUser&&auth.currentUser.email)||"",ts:Date.now()});
+    }
+    closeModal();
+  }).catch(function(e){ alert("Save failed: "+(e.code||e.message)); }).finally(function(){ $("saveBtn").disabled=false; });
 });
 $("deleteBtn").addEventListener("click", function(){
   if(!editingId) return;
@@ -867,13 +908,50 @@ function renderOpps(){
   html+=oppsGroup("Ward Mission Leader", wml);
   html+=oppsGroup("Ward Missionaries", wmiss);
   html+=oppsGroup("Reactivation Suggestions", reactivate);
-  html+=oppsGroup("Focus 5 List", focus5);
+  const f5link=' <a class="extlink no-print" style="margin-top:0" href="https://filipefa1998-sudo.github.io/focus5-tracker/" target="_blank" rel="noopener">Open Focus 5 Tracker \u2197</a>';
+  html+='<div class="rv-group"><h3>Focus 5 List ('+focus5.length+')'+f5link+'</h3>'+(focus5.length?focus5.join(""):'<div class="rv-empty">No one marked for the Focus 5 yet.</div>')+'</div>';
   $("oppsBody").innerHTML=html;
 }
 $("printOppsBtn").addEventListener("click", function(){ window.print(); });
 $("view-opps").addEventListener("click", function(e){ const card=e.target.closest(".rv-card[data-id]"); if(card) openModal(card.dataset.id); });
 
-function renderAll(){ renderDash(); renderRoster(); renderReview(); renderOpps(); }
+/* ===================== HISTORY & TRENDS ===================== */
+function renderHistory(){
+  const lb=$("logBrother");
+  if(lb){ const cur=lb.value; lb.innerHTML='<option value="">— choose brother —</option>'+data.map(function(p){return '<option value="'+esc(p.id)+'">'+esc(p.name||"(unnamed)")+'</option>';}).join(""); if(cur) lb.value=cur; }
+  const lm=$("logMilestone");
+  if(lm && !lm.dataset.filled){ lm.innerHTML='<option value="">— ordinance —</option>'+MILESTONES.map(function(m){return '<option>'+m+'</option>';}).join(""); lm.dataset.filled="1"; }
+  const ld=$("logDate"); if(ld && !ld.value) ld.value=new Date().toISOString().slice(0,10);
+
+  $("historyHeader").innerHTML='<b>Elders Quorum — Ordinance History</b><br>'+ledger.length+' completion'+(ledger.length===1?'':'s')+' recorded.';
+  if(!ledger.length){ $("historyBody").innerHTML='<div class="rv-empty">No history yet. Log a completed ordinance above, or mark a Quarter Plan goal “Completed” and it records here automatically.</div>'; return; }
+
+  const byQ={}; ledger.forEach(function(e){ const q=quarterOf(e.date); if(q) byQ[q]=(byQ[q]||0)+1; });
+  const qRows=Object.keys(byQ).sort(function(a,b){return qIdx(a)-qIdx(b);}).slice(-8).map(function(q){return {label:q,value:byQ[q],color:"#b0893a"};});
+  const byT={}; ledger.forEach(function(e){ const m=e.milestone||"Other"; byT[m]=(byT[m]||0)+1; });
+  const tRows=Object.keys(byT).sort(function(a,b){return byT[b]-byT[a];}).map(function(m){return {label:m,value:byT[m],color:"#365a8c"};});
+
+  let html='<div class="charts">'+barChart("Completions by Quarter", qRows.length?qRows:[{label:"—",value:0,color:"#b0893a"}])+barChart("By Ordinance Type", tRows.length?tRows:[{label:"—",value:0,color:"#365a8c"}])+'</div>';
+  const entries=ledger.slice().sort(function(a,b){ return (b.date||"").localeCompare(a.date||""); });
+  html+='<div class="rv-group"><h3>Logged Ordinances ('+ledger.length+')</h3>'+entries.map(function(e){
+    return '<div class="rv-card"><button class="logdel no-print" data-del="'+esc(e.id)+'" title="Remove">&times;</button>'+
+      '<div class="rv-name">'+esc(e.name||"—")+' <span style="font-weight:400;color:#6d7180">· '+esc(fmtDate(e.date))+'</span></div>'+
+      '<div class="rv-text">'+esc(e.milestone||"")+(e.by?'  ·  logged by '+esc(e.by):'')+'</div></div>';
+  }).join("")+'</div>';
+  $("historyBody").innerHTML=html;
+}
+$("addLogBtn").addEventListener("click", function(){
+  const bid=$("logBrother").value, ms=$("logMilestone").value, dt=$("logDate").value, m=$("logMsg");
+  const b=data.find(function(x){return x.id===bid;});
+  if(!b||!ms||!dt){ m.className="smsg err"; m.textContent="Choose a brother, an ordinance, and a date."; return; }
+  writeLedger({brotherId:bid,name:b.name,milestone:ms,date:dt,by:(auth.currentUser&&auth.currentUser.email)||"",ts:Date.now()})
+    .then(function(){ m.className="smsg ok"; m.textContent="Recorded "+ms+" for "+b.name+"."; })
+    .catch(function(e){ m.className="smsg err"; m.textContent="Could not record: "+(e.code||e.message); });
+});
+$("historyBody").addEventListener("click", function(e){ const x=e.target.closest("[data-del]"); if(x && confirm("Remove this history entry?")) removeLedger(x.dataset.del).catch(function(err){ alert("Delete failed: "+(err.code||err.message)); }); });
+$("printHistBtn").addEventListener("click", function(){ window.print(); });
+
+function renderAll(){ renderDash(); renderRoster(); renderReview(); renderOpps(); renderHistory(); }
 </script>
 </body>
 </html>
