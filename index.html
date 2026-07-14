@@ -193,6 +193,13 @@
     body{background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
     .rv-card,.chartwrap,.rv-stat{box-shadow:none;border:1px solid #ccc;break-inside:avoid;page-break-inside:avoid}
     .charts{grid-template-columns:1fr 1fr}
+    #rosterPrintHead{display:block !important}
+    #view-roster .tablewrap{overflow:visible;box-shadow:none;border:none;border-radius:0}
+    #view-roster table{width:100%;font-size:10.5px}
+    #view-roster th,#view-roster td{padding:5px 6px}
+    #view-roster thead{display:table-header-group}
+    #view-roster tr{break-inside:avoid;page-break-inside:avoid}
+    #view-roster .badge{border:none;background:none !important;padding:0;color:#000 !important;font-size:10.5px}
   }
   @media(max-width:640px){
     .secgrid{grid-template-columns:1fr}
@@ -248,8 +255,15 @@
     </section>
 
     <section class="view" id="view-roster">
-      <div class="vhead"><h2 class="serif">Brethren</h2><button class="btn gold" id="addBtn">+ Add Brother</button></div>
-      <div class="toolbar">
+      <div class="vhead">
+        <h2 class="serif">Brethren</h2>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn ghost no-print" id="csvRosterBtn">Export CSV (Excel)</button>
+          <button class="btn primary no-print" id="printRosterBtn">Print / Save as PDF</button>
+          <button class="btn gold no-print" id="addBtn">+ Add Brother</button>
+        </div>
+      </div>
+      <div class="toolbar no-print">
         <input type="text" id="search" placeholder="Search by name…">
         <select id="filter">
           <option value="all">All brethren</option>
@@ -272,6 +286,7 @@
           <option value="highpriest">High priests</option>
         </select>
       </div>
+      <div id="rosterPrintHead" class="rv-printhead" style="display:none"></div>
       <div class="tablewrap">
         <table>
           <thead><tr>
@@ -620,6 +635,55 @@ function renderRoster(){
 }
 $("search").addEventListener("input", renderRoster);
 $("filter").addEventListener("change", renderRoster);
+
+/* ---- Roster print & CSV export (current section only) ---- */
+function currentRosterRows(){
+  const q=$("search").value.toLowerCase(), f=$("filter").value;
+  return data.filter(function(p){ return passesFilter(p,f)&&(!q||(p.name||"").toLowerCase().indexOf(q)>=0); })
+             .slice().sort(function(a,b){ return (a.name||"").localeCompare(b.name||""); });
+}
+function rosterSectionLabel(){
+  const sel=$("filter");
+  let label=sel.options[sel.selectedIndex].text;
+  const q=$("search").value.trim();
+  if(q) label+=' — search: “'+q+'”';
+  return label;
+}
+$("printRosterBtn").addEventListener("click", function(){
+  const rows=currentRosterRows();
+  $("rosterPrintHead").innerHTML='<b>Elders Quorum — Brethren: '+esc(rosterSectionLabel())+'</b><br>'+
+    'Generated '+fmtDate(new Date().toISOString())+' · '+rows.length+' brethren in this section.';
+  const st=document.createElement("style");
+  st.id="rosterPageStyle";
+  st.textContent="@page{size:landscape;margin:10mm}";
+  document.head.appendChild(st);
+  const cleanup=function(){ const s=document.getElementById("rosterPageStyle"); if(s) s.remove(); window.removeEventListener("afterprint",cleanup); };
+  window.addEventListener("afterprint", cleanup);
+  window.print();
+});
+$("csvRosterBtn").addEventListener("click", function(){
+  const rows=currentRosterRows();
+  if(!rows.length){ alert("No brethren in this section to export."); return; }
+  function cell(v){ v=(v==null?"":String(v)); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
+  const head=["Name","Phone","Boundaries","Records","Activity","Office","Next Office","Recommend","Recommend Type","Renewal","Temple Prep","Next Ordinance","Mission","Calling","Focus 5","Flags","Notes"];
+  const lines=[head.join(",")].concat(rows.map(function(p){
+    const rf=renewalFlag(p), rs=recordsStage(p);
+    const fl=computeFlags(p).map(function(x){return x.t;}).join(" • ");
+    return [
+      p.name||"", p.phone||"", p.boundaries||"", rs.t||"", p.activity||"", p.office||"",
+      (needAdvance(p)?p.nextOffice:"") , p.recommend||"", p.recommendType||"",
+      rf.t||"", p.templePrep||"", p.nextOrdinance||"", p.mission||"",
+      p.calling||"", p.focus5||"", fl, p.notes||""
+    ].map(cell).join(",");
+  }));
+  const label=rosterSectionLabel().replace(/[^\w]+/g,"-").replace(/^-+|-+$/g,"").toLowerCase();
+  const blob=new Blob(["\uFEFF"+lines.join("\r\n")],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="brethren-"+label+"-"+new Date().toISOString().slice(0,10)+".csv";
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
 
 /* ===================== MEETING REVIEW ===================== */
 function fmtDate(s){ const d=new Date(s); if(isNaN(d)) return s; return d.toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"}); }
