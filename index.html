@@ -102,6 +102,19 @@
   .nm{font-weight:600;color:var(--ink)}
   .empty{padding:46px 20px;text-align:center;color:var(--muted);font-size:14px}
 
+  th.colf{cursor:pointer;user-select:none}
+  th.colf:hover{background:#37416b}
+  th.colf::after{content:" ▾";opacity:.55;font-size:10px}
+  th.colf.filtered{background:#8a6d2a;color:#fff}
+  th.colf .fval{display:block;font-size:10px;font-weight:500;letter-spacing:.2px;color:#ffe9b0;text-transform:none;margin-top:2px;max-width:130px;overflow:hidden;text-overflow:ellipsis}
+  .colmenu{position:absolute;z-index:60;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 28px rgba(20,26,48,.22);min-width:190px;max-height:320px;overflow:auto;padding:6px}
+  .colmenu button{display:block;width:100%;text-align:left;padding:8px 11px;border-radius:7px;font-size:13px;color:var(--text);background:none}
+  .colmenu button:hover{background:#f4efe2}
+  .colmenu button.on{background:var(--gold-soft);color:#7a5e1d;font-weight:600}
+  .colmenu .cnt{float:right;color:var(--muted);font-size:11.5px}
+  .colmenu .sep{border-top:1px solid var(--line);margin:5px 0}
+  .clearcols{margin-left:auto;font-size:12px;font-weight:600;color:#9d3b3b;background:#f6e1e1;border-radius:8px;padding:7px 12px;display:none}
+
   .badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .b-ok{background:#e4f1ea;color:var(--ok)}.b-warn{background:#f7ecd2;color:var(--warn)}
   .b-danger{background:#f6e1e1;color:var(--danger)}.b-info{background:#e3ebf6;color:var(--info)}
@@ -285,14 +298,15 @@
           <option value="elder">Elders</option>
           <option value="highpriest">High priests</option>
         </select>
+        <button id="clearColsBtn" class="clearcols no-print">✕ Clear column filters</button>
       </div>
       <div id="rosterPrintHead" class="rv-printhead" style="display:none"></div>
       <div class="tablewrap">
         <table>
           <thead><tr>
-            <th>Name</th><th>Boundaries</th><th>Records</th><th>Activity</th>
-            <th>Office</th><th>Next Office</th><th>Recommend</th><th>Renewal</th>
-            <th>Temple Prep</th><th>Next Ordinance</th><th>Action</th>
+            <th>Name</th><th class="colf" data-col="boundaries">Boundaries</th><th class="colf" data-col="records">Records</th><th class="colf" data-col="activity">Activity</th>
+            <th class="colf" data-col="office">Office</th><th class="colf" data-col="nextOffice">Next Office</th><th class="colf" data-col="recommend">Recommend</th><th class="colf" data-col="renewal">Renewal</th>
+            <th class="colf" data-col="templePrep">Temple Prep</th><th class="colf" data-col="nextOrdinance">Next Ordinance</th><th class="colf" data-col="action">Action</th>
           </tr></thead>
           <tbody id="rosterBody"></tbody>
         </table>
@@ -614,9 +628,87 @@ function passesFilter(p,f){
     default: return true;
   }
 }
-function renderRoster(){
+/* ---- Column header filters (Excel-style) ---- */
+const colFilters={};
+function colVal(p,col){
+  switch(col){
+    case "boundaries": return p.boundaries||"—";
+    case "records": return recordsStage(p).t||"—";
+    case "activity": return p.activity||"—";
+    case "office": return p.office||"—";
+    case "nextOffice": return needAdvance(p)?(p.nextOffice||"—"):"—";
+    case "recommend": return p.recommend||"—";
+    case "renewal": return renewalFlag(p).t||"—";
+    case "templePrep": return p.templePrep||"—";
+    case "nextOrdinance": return p.nextOrdinance||"—";
+    case "action": return computeFlags(p).length?"Has follow-up flag":"No flags";
+    default: return "—";
+  }
+}
+function passesColFilters(p,skipCol){
+  for(const c in colFilters){
+    if(c===skipCol) continue;
+    if(colVal(p,c)!==colFilters[c]) return false;
+  }
+  return true;
+}
+function baseRosterRows(){
   const q=$("search").value.toLowerCase(), f=$("filter").value;
-  const rows=data.filter(function(p){ return passesFilter(p,f)&&(!q||(p.name||"").toLowerCase().indexOf(q)>=0); });
+  return data.filter(function(p){ return passesFilter(p,f)&&(!q||(p.name||"").toLowerCase().indexOf(q)>=0); });
+}
+function refreshColHeads(){
+  let any=false;
+  document.querySelectorAll("#view-roster th.colf").forEach(function(th){
+    const c=th.dataset.col, old=th.querySelector(".fval");
+    if(old) old.remove();
+    if(colFilters[c]!==undefined){
+      any=true; th.classList.add("filtered");
+      const s=document.createElement("span"); s.className="fval"; s.textContent=colFilters[c];
+      th.appendChild(s);
+    } else th.classList.remove("filtered");
+  });
+  $("clearColsBtn").style.display=any?"inline-block":"none";
+}
+function closeColMenu(){ const m=document.getElementById("colMenu"); if(m) m.remove(); }
+function openColMenu(th){
+  closeColMenu();
+  const col=th.dataset.col;
+  const pool=baseRosterRows().filter(function(p){ return passesColFilters(p,col); });
+  const counts={};
+  pool.forEach(function(p){ const v=colVal(p,col); counts[v]=(counts[v]||0)+1; });
+  const vals=Object.keys(counts).sort(function(a,b){ return a==="—"?1:(b==="—"?-1:a.localeCompare(b)); });
+  const menu=document.createElement("div");
+  menu.id="colMenu"; menu.className="colmenu";
+  let html='<button data-v="__all" class="'+(colFilters[col]===undefined?"on":"")+'">All <span class="cnt">'+pool.length+'</span></button><div class="sep"></div>';
+  html+=vals.map(function(v){
+    return '<button data-v="'+esc(v)+'" class="'+(colFilters[col]===v?"on":"")+'">'+esc(v)+' <span class="cnt">'+counts[v]+'</span></button>';
+  }).join("");
+  menu.innerHTML=html;
+  document.body.appendChild(menu);
+  const r=th.getBoundingClientRect();
+  let left=r.left+window.scrollX;
+  menu.style.top=(r.bottom+window.scrollY+4)+"px";
+  if(left+menu.offsetWidth>window.scrollX+document.documentElement.clientWidth-10)
+    left=window.scrollX+document.documentElement.clientWidth-menu.offsetWidth-10;
+  menu.style.left=Math.max(10,left)+"px";
+  menu.addEventListener("click", function(e){
+    const b=e.target.closest("button[data-v]"); if(!b) return;
+    if(b.dataset.v==="__all") delete colFilters[col]; else colFilters[col]=b.dataset.v;
+    closeColMenu(); refreshColHeads(); renderRoster();
+  });
+}
+document.querySelectorAll("#view-roster th.colf").forEach(function(th){
+  th.addEventListener("click", function(e){ e.stopPropagation(); openColMenu(th); });
+});
+document.addEventListener("click", function(e){ if(!e.target.closest("#colMenu")) closeColMenu(); });
+window.addEventListener("resize", closeColMenu);
+$("clearColsBtn").addEventListener("click", function(){
+  for(const c in colFilters) delete colFilters[c];
+  refreshColHeads(); renderRoster();
+});
+
+function renderRoster(){
+  const rows=baseRosterRows().filter(function(p){ return passesColFilters(p); });
   const body=$("rosterBody");
   if(!rows.length){ body.innerHTML='<tr><td colspan="11" class="empty">No brethren match. Use “+ Add Brother” to begin.</td></tr>'; return; }
   body.innerHTML=rows.map(function(p){
@@ -638,8 +730,7 @@ $("filter").addEventListener("change", renderRoster);
 
 /* ---- Roster print & CSV export (current section only) ---- */
 function currentRosterRows(){
-  const q=$("search").value.toLowerCase(), f=$("filter").value;
-  return data.filter(function(p){ return passesFilter(p,f)&&(!q||(p.name||"").toLowerCase().indexOf(q)>=0); })
+  return baseRosterRows().filter(function(p){ return passesColFilters(p); })
              .slice().sort(function(a,b){ return (a.name||"").localeCompare(b.name||""); });
 }
 function rosterSectionLabel(){
@@ -647,6 +738,9 @@ function rosterSectionLabel(){
   let label=sel.options[sel.selectedIndex].text;
   const q=$("search").value.trim();
   if(q) label+=' — search: “'+q+'”';
+  const colLabels={boundaries:"Boundaries",records:"Records",activity:"Activity",office:"Office",nextOffice:"Next Office",recommend:"Recommend",renewal:"Renewal",templePrep:"Temple Prep",nextOrdinance:"Next Ordinance",action:"Action"};
+  const parts=Object.keys(colFilters).map(function(c){ return colLabels[c]+": "+colFilters[c]; });
+  if(parts.length) label+=" — "+parts.join(" · ");
   return label;
 }
 $("printRosterBtn").addEventListener("click", function(){
